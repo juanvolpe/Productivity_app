@@ -119,4 +119,32 @@ export async function updateTaskStatus(
     console.error('Failed to update task status:', error);
     throw new PlaylistError('Failed to update task', 'UPDATE_ERROR');
   }
+}
+
+export async function getPlaylist(id: string): Promise<PlaylistWithTasks | null> {
+  try {
+    logger.info('Loading playlist', { id });
+    
+    const playlist = await prisma.playlist.findUnique({
+      where: { id },
+      include: {
+        tasks: {
+          orderBy: {
+            order: 'asc'
+          }
+        }
+      }
+    });
+
+    if (!playlist) {
+      logger.warn('Playlist not found', { id });
+      return null;
+    }
+
+    logger.info('Playlist loaded successfully', { id, title: playlist.title });
+    return playlist;
+  } catch (error) {
+    logger.error('Failed to load playlist', { id, error });
+    throw new PlaylistError('Failed to fetch playlist.', 'FETCH_ERROR');
+  }
 } 
