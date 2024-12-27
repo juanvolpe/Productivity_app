@@ -3,7 +3,6 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { PlaylistCreateInput } from '@/types/playlist';
-import { createPlaylist } from '@/lib/playlist';
 
 interface TaskInput {
   title: string;
@@ -74,7 +73,19 @@ export default function NewPlaylistPage() {
         }
       };
 
-      await createPlaylist(playlistData);
+      const response = await fetch('/api/playlists', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(playlistData),
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || 'Failed to create playlist');
+      }
+
       router.push('/playlists');
       router.refresh();
     } catch (error) {
