@@ -5,7 +5,7 @@ declare global {
   var prisma: PrismaClient | undefined;
 }
 
-const prismaOptions: any = {
+const prismaOptions: Prisma.PrismaClientOptions = {
   log: process.env.NODE_ENV === 'production'
     ? ['error']
     : [
@@ -13,12 +13,12 @@ const prismaOptions: any = {
         { level: 'error', emit: 'event' },
         { level: 'warn', emit: 'event' }
       ],
-  errorFormat: 'pretty',
+  datasources: {
+    db: {
+      url: process.env.POSTGRES_PRISMA_URL || process.env.DATABASE_URL
+    }
+  }
 };
-
-if (!process.env.POSTGRES_PRISMA_URL && !process.env.DATABASE_URL) {
-  throw new Error('Database URL not found in environment variables');
-}
 
 export const prisma = globalThis.prisma || new PrismaClient(prismaOptions);
 

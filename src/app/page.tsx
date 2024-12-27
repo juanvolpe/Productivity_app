@@ -4,6 +4,10 @@ import Link from "next/link";
 export default async function Home() {
   try {
     const playlists = await getTodaysPlaylists();
+    
+    if (!playlists) {
+      throw new Error('Failed to load playlists');
+    }
 
     return (
       <main className="p-4">
@@ -36,7 +40,9 @@ export default async function Home() {
     return (
       <div className="p-4">
         <h1 className="text-2xl font-bold text-red-600">Error</h1>
-        <p className="mt-2 text-gray-600">Failed to load playlists. Please try again later.</p>
+        <p className="mt-2 text-gray-600">
+          {error instanceof Error ? error.message : 'Failed to load playlists. Please try again later.'}
+        </p>
       </div>
     );
   }
