@@ -4,10 +4,20 @@ import { useEffect, useState } from 'react';
 import Link from "next/link";
 import { PlaylistWithTasks } from '@/types/playlist';
 
+function formatDate() {
+  const today = new Date();
+  const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+  const dayName = days[today.getDay()];
+  const month = (today.getMonth() + 1).toString().padStart(2, '0');
+  const date = today.getDate().toString().padStart(2, '0');
+  return { dayName, shortDate: `${month}/${date}` };
+}
+
 export default function Home() {
   const [playlists, setPlaylists] = useState<PlaylistWithTasks[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const { dayName, shortDate } = formatDate();
 
   useEffect(() => {
     const loadPlaylists = async () => {
@@ -30,12 +40,13 @@ export default function Home() {
 
   if (isLoading) {
     return (
-      <div className="p-4">
+      <div className="p-8 max-w-4xl mx-auto">
         <div className="animate-pulse">
-          <div className="h-8 bg-gray-200 rounded w-1/4 mb-6"></div>
+          <div className="h-12 bg-indigo-100 rounded-lg w-1/4 mb-2"></div>
+          <div className="h-6 bg-purple-100 rounded-lg w-1/6 mb-8"></div>
           <div className="space-y-4">
             {[1, 2].map((n) => (
-              <div key={n} className="h-24 bg-gray-200 rounded"></div>
+              <div key={n} className="h-24 bg-white rounded-xl border border-indigo-100"></div>
             ))}
           </div>
         </div>
@@ -45,14 +56,14 @@ export default function Home() {
 
   if (error) {
     return (
-      <div className="p-4">
-        <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+      <div className="p-8 max-w-4xl mx-auto">
+        <div className="bg-red-50 border border-red-100 rounded-xl p-6">
           <h2 className="text-red-800 font-medium">Error</h2>
           <p className="text-red-600 mt-1">{error}</p>
           <div className="mt-4">
             <Link
               href="/playlists"
-              className="text-blue-500 hover:text-blue-600"
+              className="text-indigo-500 hover:text-indigo-600 font-medium"
             >
               Go to All Playlists
             </Link>
@@ -63,23 +74,22 @@ export default function Home() {
   }
 
   return (
-    <main className="p-4">
-      <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-bold">Today's Playlists</h1>
+    <main className="p-8 max-w-4xl mx-auto">
+      <div className="mb-12 text-center">
+        <h2 className="page-title mb-2">{dayName}</h2>
+        <p className="subtitle">{shortDate}</p>
+      </div>
+
+      <div className="flex items-center justify-between mb-8">
+        <h1 className="text-2xl font-bold text-gray-800">Today's Playlists</h1>
         <div className="flex gap-4">
-          <Link
-            href="/playlists/new"
-            className="bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600 transition-colors flex items-center gap-2"
-          >
+          <Link href="/playlists/new" className="btn-primary">
             <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
             </svg>
             Create Playlist
           </Link>
-          <Link
-            href="/playlists"
-            className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition-colors flex items-center gap-2"
-          >
+          <Link href="/playlists" className="btn-secondary">
             <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
             </svg>
@@ -90,13 +100,21 @@ export default function Home() {
       
       <div className="space-y-4">
         {playlists.length === 0 ? (
-          <div className="text-center py-12 bg-gray-50 rounded-lg border border-gray-200">
+          <div className="card text-center py-12">
+            <div className="mb-4">
+              <svg className="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M19 9l-7 7-7-7"/>
+              </svg>
+            </div>
             <p className="text-gray-600 mb-4">No playlists scheduled for today</p>
             <Link
               href="/playlists/new"
-              className="text-blue-500 hover:text-blue-600 font-medium"
+              className="text-indigo-500 hover:text-indigo-600 font-medium inline-flex items-center gap-2"
             >
-              Create your first playlist
+              <span>Create your first playlist</span>
+              <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7"/>
+              </svg>
             </Link>
           </div>
         ) : (
@@ -104,12 +122,23 @@ export default function Home() {
             <Link
               key={playlist.id}
               href={`/playlist/${playlist.id}`}
-              className="block p-4 rounded-lg border border-gray-200 hover:border-blue-500 transition-colors"
+              className="card block hover:border-indigo-200 group"
             >
-              <h2 className="text-lg font-semibold">{playlist.name}</h2>
-              <p className="text-sm text-gray-600">
-                {playlist.tasks.length} tasks
-              </p>
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-lg font-semibold group-hover:text-indigo-600 transition-colors">
+                    {playlist.name}
+                  </h2>
+                  <p className="text-sm text-gray-500">
+                    {playlist.tasks.length} tasks
+                  </p>
+                </div>
+                <div className="opacity-0 group-hover:opacity-100 transition-opacity">
+                  <svg className="h-5 w-5 text-indigo-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7"/>
+                  </svg>
+                </div>
+              </div>
             </Link>
           ))
         )}
