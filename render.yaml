@@ -2,7 +2,7 @@ services:
   - type: web
     name: productivity-app
     env: node
-    buildCommand: ./build.sh
+    buildCommand: npm install && npx prisma generate && npm run build
     startCommand: npm start
     envVars:
       - key: DATABASE_URL
@@ -11,13 +11,8 @@ services:
           property: connectionString
       - key: NODE_ENV
         value: production
-    buildFilter:
-      paths:
-        - src/**
-        - prisma/**
-        - package.json
-        - next.config.js
-        - tsconfig.json
+      - key: NEXT_PUBLIC_API_URL
+        value: https://productivity-app.onrender.com
 
 databases:
   - name: productivity-app-db
