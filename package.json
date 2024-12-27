@@ -4,12 +4,13 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "node scripts/check-env.js && prisma generate && prisma db push --accept-data-loss && next build",
+    "build": "node scripts/check-env.js && prisma generate && prisma db push --accept-data-loss && node scripts/seed-db.js && next build",
     "start": "next start -p $PORT",
     "lint": "next lint",
     "postinstall": "prisma generate",
     "migrate:deploy": "prisma migrate deploy",
-    "test:db": "prisma db push --preview-feature && node scripts/test-db-connection.js"
+    "test:db": "prisma db push --preview-feature && node scripts/test-db-connection.js",
+    "seed": "node scripts/seed-db.js"
   },
   "dependencies": {
     "@prisma/client": "^6.1.0",
