@@ -4,6 +4,8 @@ import { logger } from '@/lib/logger';
 
 export async function GET() {
   try {
+    logger.info('Fetching all playlists');
+
     const playlists = await prisma.playlist.findMany({
       include: {
         tasks: {
@@ -11,16 +13,17 @@ export async function GET() {
             order: 'asc'
           }
         }
+      },
+      orderBy: {
+        updatedAt: 'desc'
       }
     });
 
+    logger.info(`Found ${playlists.length} playlists`);
     return NextResponse.json(playlists);
   } catch (error) {
     logger.error('Failed to fetch playlists:', error);
-    return NextResponse.json(
-      { error: 'Failed to fetch playlists' },
-      { status: 500 }
-    );
+    return new NextResponse('Internal Server Error', { status: 500 });
   }
 }
 
@@ -48,24 +51,18 @@ export async function DELETE(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
     const id = searchParams.get('id');
-    
+
     if (!id) {
-      return NextResponse.json(
-        { error: 'Playlist ID is required' },
-        { status: 400 }
-      );
+      return new NextResponse('Playlist ID is required', { status: 400 });
     }
 
     await prisma.playlist.delete({
       where: { id }
     });
-    
-    return NextResponse.json({ success: true });
+
+    return new NextResponse('Playlist deleted successfully');
   } catch (error) {
     logger.error('Failed to delete playlist:', error);
-    return NextResponse.json(
-      { error: 'Failed to delete playlist' },
-      { status: 500 }
-    );
+    return new NextResponse('Internal Server Error', { status: 500 });
   }
 } 
