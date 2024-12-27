@@ -13,6 +13,18 @@ function formatDate() {
   return { dayName, shortDate: `${month}/${date}` };
 }
 
+function getScheduleDays(playlist: PlaylistWithTasks): string[] {
+  const days = [];
+  if (playlist.monday) days.push('Monday');
+  if (playlist.tuesday) days.push('Tuesday');
+  if (playlist.wednesday) days.push('Wednesday');
+  if (playlist.thursday) days.push('Thursday');
+  if (playlist.friday) days.push('Friday');
+  if (playlist.saturday) days.push('Saturday');
+  if (playlist.sunday) days.push('Sunday');
+  return days;
+}
+
 export default function Home() {
   const [playlists, setPlaylists] = useState<PlaylistWithTasks[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -106,7 +118,7 @@ export default function Home() {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M19 9l-7 7-7-7"/>
               </svg>
             </div>
-            <p className="text-gray-600 mb-4">No playlists scheduled for today</p>
+            <p className="text-gray-600 mb-4">No playlists scheduled for {dayName}</p>
             <Link
               href="/playlists/new"
               className="text-indigo-500 hover:text-indigo-600 font-medium inline-flex items-center gap-2"
@@ -129,9 +141,14 @@ export default function Home() {
                   <h2 className="text-lg font-semibold group-hover:text-indigo-600 transition-colors">
                     {playlist.name}
                   </h2>
-                  <p className="text-sm text-gray-500">
-                    {playlist.tasks.length} tasks
-                  </p>
+                  <div className="flex items-center gap-4">
+                    <p className="text-sm text-gray-500">
+                      {playlist.tasks.length} tasks
+                    </p>
+                    <p className="text-sm text-indigo-500">
+                      Scheduled: {getScheduleDays(playlist).join(', ')}
+                    </p>
+                  </div>
                 </div>
                 <div className="opacity-0 group-hover:opacity-100 transition-opacity">
                   <svg className="h-5 w-5 text-indigo-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
