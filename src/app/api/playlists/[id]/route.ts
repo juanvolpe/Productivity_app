@@ -19,31 +19,61 @@ export async function GET(
     });
 
     if (!playlist) {
-      return NextResponse.json(
-        { error: 'Playlist not found' },
-        { status: 404 }
-      );
+      return new NextResponse('Playlist not found', { status: 404 });
     }
 
     return NextResponse.json(playlist);
   } catch (error) {
     logger.error('Failed to fetch playlist:', error);
-    return NextResponse.json(
-      { error: 'Failed to fetch playlist' },
-      { status: 500 }
-    );
+    return new NextResponse('Internal Server Error', { status: 500 });
   }
 }
 
-export async function PATCH(
+export async function PUT(
   request: Request,
   { params }: { params: { id: string } }
 ) {
   try {
     const data = await request.json();
-    const playlist = await prisma.playlist.update({
+    const { tasks, ...playlistData } = data;
+
+    // Update playlist
+    const updatedPlaylist = await prisma.playlist.update({
       where: { id: params.id },
-      data,
+      data: {
+        ...playlistData,
+        tasks: {
+          // Delete tasks that are not in the updated list
+          deleteMany: {
+            playlistId: params.id,
+            id: {
+              notIn: tasks
+                .filter((task: any) => task.id && !task.id.startsWith('temp-'))
+                .map((task: any) => task.id),
+            },
+          },
+          // Update existing tasks
+          update: tasks
+            .filter((task: any) => task.id && !task.id.startsWith('temp-'))
+            .map((task: any) => ({
+              where: { id: task.id },
+              data: {
+                title: task.title,
+                duration: task.duration,
+                order: task.order,
+              },
+            })),
+          // Create new tasks
+          create: tasks
+            .filter((task: any) => !task.id || task.id.startsWith('temp-'))
+            .map((task: any) => ({
+              title: task.title,
+              duration: task.duration,
+              order: task.order,
+              isCompleted: false,
+            })),
+        },
+      },
       include: {
         tasks: {
           orderBy: {
@@ -53,12 +83,9 @@ export async function PATCH(
       }
     });
 
-    return NextResponse.json(playlist);
+    return NextResponse.json(updatedPlaylist);
   } catch (error) {
     logger.error('Failed to update playlist:', error);
-    return NextResponse.json(
-      { error: 'Failed to update playlist' },
-      { status: 500 }
-    );
+    return new NextResponse('Internal Server Error', { status: 500 });
   }
 } 
