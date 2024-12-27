@@ -1,7 +1,7 @@
 import { prisma } from './db';
 import type { Prisma } from '@prisma/client';
 import { PlaylistWithTasks, PlaylistCreateInput } from '@/types/playlist';
-import { logger } from '@/lib/logger';
+import { logger } from './logger';
 
 export class PlaylistError extends Error {
   constructor(message: string, public code: string) {

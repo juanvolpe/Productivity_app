@@ -3,7 +3,8 @@
 import { useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
 import { PlaylistWithTasks } from '@/types/playlist';
-import { getPlaylistById, updateTaskStatus } from '@/lib/playlist';
+import { getPlaylistById, updateTaskStatus } from '../../../lib/playlist';
+import { logger } from '../../../lib/logger';
 
 interface TaskWithTimer {
   id: string;
@@ -28,8 +29,10 @@ export default function ActivePlaylistPage() {
   useEffect(() => {
     const loadPlaylist = async () => {
       try {
+        logger.info('Loading playlist:', params.id);
         const data = await getPlaylistById(params.id as string);
         if (data) {
+          logger.debug('Playlist loaded:', data);
           setPlaylist(data);
           setTasks(data.tasks.map(task => ({
             ...task,
@@ -37,6 +40,7 @@ export default function ActivePlaylistPage() {
           } as TaskWithTimer)));
         }
       } catch (err) {
+        logger.error('Failed to load playlist:', err);
         setError(err instanceof Error ? err.message : 'Failed to load playlist');
       }
     };

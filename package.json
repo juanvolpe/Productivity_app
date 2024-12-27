@@ -4,11 +4,12 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "prisma generate && prisma migrate deploy && next build",
+    "build": "node scripts/check-env.js && prisma generate && prisma migrate deploy && next build",
     "start": "next start -p $PORT",
     "lint": "next lint",
     "postinstall": "prisma generate",
-    "migrate:deploy": "prisma migrate deploy"
+    "migrate:deploy": "prisma migrate deploy",
+    "test:db": "prisma db push --preview-feature && node scripts/test-db-connection.js"
   },
   "dependencies": {
     "@prisma/client": "^6.1.0",
