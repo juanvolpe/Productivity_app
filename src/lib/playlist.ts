@@ -1,5 +1,5 @@
 import { prisma } from './db';
-import { Playlist, Task } from '@prisma/client';
+import type { Prisma } from '@prisma/client';
 import { PlaylistWithTasks, PlaylistCreateInput } from '@/types/playlist';
 
 export class PlaylistError extends Error {
@@ -99,11 +99,15 @@ export async function deletePlaylist(id: string): Promise<void> {
   }
 }
 
-export async function updateTaskStatus(taskId: string, isCompleted: boolean): Promise<Task> {
+export async function updateTaskStatus(
+  taskId: string, 
+  isCompleted: boolean
+): Promise<{ id: string; isCompleted: boolean }> {
   try {
     return await prisma.task.update({
       where: { id: taskId },
-      data: { isCompleted }
+      data: { isCompleted },
+      select: { id: true, isCompleted: true }
     });
   } catch (error) {
     console.error('Failed to update task status:', error);

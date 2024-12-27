@@ -2,13 +2,18 @@
 
 import { useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
-import { Prisma } from '@prisma/client';
 import { PlaylistWithTasks } from '@/types/playlist';
 import { getPlaylistById, updateTaskStatus } from '@/lib/playlist';
 
-type Task = Prisma.TaskGetPayload<{}>;
-
-interface TaskWithTimer extends Task {
+interface TaskWithTimer {
+  id: string;
+  title: string;
+  duration: number;
+  isCompleted: boolean;
+  order: number;
+  playlistId: string;
+  createdAt: Date;
+  updatedAt: Date;
   timeLeft: number;
 }
 
@@ -29,7 +34,7 @@ export default function ActivePlaylistPage() {
           setTasks(data.tasks.map(task => ({
             ...task,
             timeLeft: task.duration * 60
-          })));
+          } as TaskWithTimer)));
         }
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Failed to load playlist');

@@ -12,6 +12,14 @@ services:
         fromDatabase:
           name: productivity-app-db
           property: connectionString
+      - key: POSTGRES_PRISMA_URL
+        fromDatabase:
+          name: productivity-app-db
+          property: connectionString
+      - key: POSTGRES_URL_NON_POOLING
+        fromDatabase:
+          name: productivity-app-db
+          property: connectionString
 
 databases:
   - name: productivity-app-db
