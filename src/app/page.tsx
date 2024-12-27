@@ -24,6 +24,26 @@ function getScheduleDays(playlist: PlaylistWithTasks): string[] {
   return days;
 }
 
+function getPlaylistStatus(playlist: PlaylistWithTasks) {
+  const completedTasks = playlist.tasks.filter(task => task.isCompleted).length;
+  if (completedTasks === 0) return 'Not Started';
+  if (completedTasks === playlist.tasks.length) return 'Completed';
+  return 'In Progress';
+}
+
+function getStatusColor(status: string) {
+  switch (status) {
+    case 'Not Started':
+      return 'text-gray-500 bg-gray-100';
+    case 'In Progress':
+      return 'text-indigo-600 bg-indigo-50';
+    case 'Completed':
+      return 'text-green-600 bg-green-50';
+    default:
+      return 'text-gray-500 bg-gray-100';
+  }
+}
+
 export default function Home() {
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [playlists, setPlaylists] = useState<PlaylistWithTasks[]>([]);
@@ -179,34 +199,39 @@ export default function Home() {
             </Link>
           </div>
         ) : (
-          playlists.map((playlist) => (
-            <Link
-              key={playlist.id}
-              href={`/playlist/${playlist.id}`}
-              className="card block hover:border-indigo-200 group"
-            >
-              <div className="flex items-center justify-between">
-                <div>
-                  <h2 className="text-lg font-semibold group-hover:text-indigo-600 transition-colors">
-                    {playlist.name}
-                  </h2>
-                  <div className="flex items-center gap-4">
+          playlists.map((playlist) => {
+            const status = getPlaylistStatus(playlist);
+            const statusColor = getStatusColor(status);
+            
+            return (
+              <Link
+                key={playlist.id}
+                href={`/playlist/${playlist.id}`}
+                className="card block hover:border-indigo-200 group"
+              >
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h2 className="text-lg font-semibold group-hover:text-indigo-600 transition-colors">
+                      {playlist.name}
+                    </h2>
                     <p className="text-sm text-gray-500">
                       {playlist.tasks.length} tasks
                     </p>
-                    <p className="text-sm text-indigo-500">
-                      Scheduled: {getScheduleDays(playlist).join(', ')}
-                    </p>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <span className={`px-3 py-1 rounded-full text-sm font-medium ${statusColor}`}>
+                      {status}
+                    </span>
+                    <div className="opacity-0 group-hover:opacity-100 transition-opacity">
+                      <svg className="h-5 w-5 text-indigo-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7"/>
+                      </svg>
+                    </div>
                   </div>
                 </div>
-                <div className="opacity-0 group-hover:opacity-100 transition-opacity">
-                  <svg className="h-5 w-5 text-indigo-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7"/>
-                  </svg>
-                </div>
-              </div>
-            </Link>
-          ))
+              </Link>
+            );
+          })
         )}
       </div>
     </main>
