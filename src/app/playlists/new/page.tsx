@@ -49,17 +49,29 @@ export default function NewPlaylistPage() {
     e.preventDefault();
     if (isSubmitting) return;
 
+    if (tasks.length === 0) {
+      alert('Please add at least one task');
+      return;
+    }
+
+    if (!Object.values(activeDays).some(day => day)) {
+      alert('Please select at least one active day');
+      return;
+    }
+
     try {
       setIsSubmitting(true);
       const playlistData: PlaylistCreateInput = {
         name,
         ...activeDays,
-        tasks: tasks.map(task => ({
-          title: task.title,
-          duration: task.duration,
-          isCompleted: false,
-          order: task.order,
-        })),
+        tasks: {
+          create: tasks.map(task => ({
+            title: task.title,
+            duration: task.duration,
+            isCompleted: false,
+            order: task.order,
+          }))
+        }
       };
 
       await createPlaylist(playlistData);

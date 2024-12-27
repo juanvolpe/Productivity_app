@@ -4,6 +4,8 @@ export type PlaylistWithTasks = Prisma.PlaylistGetPayload<{
   include: { tasks: true }
 }>;
 
-export type PlaylistCreateInput = Prisma.PlaylistCreateInput & {
-  tasks: Prisma.TaskCreateInput[];
+export type PlaylistCreateInput = Omit<Prisma.PlaylistCreateInput, 'tasks'> & {
+  tasks: {
+    create: Omit<Prisma.TaskCreateInput, 'playlist'>[]
+  }
 }; 

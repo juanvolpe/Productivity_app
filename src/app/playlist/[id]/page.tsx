@@ -2,9 +2,11 @@
 
 import { useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
-import { Task } from '@prisma/client';
+import { Prisma } from '@prisma/client';
 import { PlaylistWithTasks } from '@/types/playlist';
 import { getPlaylistById, updateTaskStatus } from '@/lib/playlist';
+
+type Task = Prisma.TaskGetPayload<{}>;
 
 interface TaskWithTimer extends Task {
   timeLeft: number;
@@ -16,16 +18,21 @@ export default function ActivePlaylistPage() {
   const [currentTaskIndex, setCurrentTaskIndex] = useState(0);
   const [isRunning, setIsRunning] = useState(false);
   const [tasks, setTasks] = useState<TaskWithTimer[]>([]);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const loadPlaylist = async () => {
-      const data = await getPlaylistById(params.id as string);
-      if (data) {
-        setPlaylist(data);
-        setTasks(data.tasks.map(task => ({
-          ...task,
-          timeLeft: task.duration * 60 // Convert minutes to seconds
-        })));
+      try {
+        const data = await getPlaylistById(params.id as string);
+        if (data) {
+          setPlaylist(data);
+          setTasks(data.tasks.map(task => ({
+            ...task,
+            timeLeft: task.duration * 60
+          })));
+        }
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Failed to load playlist');
       }
     };
     loadPlaylist();
@@ -59,6 +66,8 @@ export default function ActivePlaylistPage() {
       setCurrentTaskIndex(prev => prev + 1);
     }
   };
+
+  if (error) return <div className="p-4 text-red-500">{error}</div>;
 
   if (!playlist) return <div>Loading...</div>;
 

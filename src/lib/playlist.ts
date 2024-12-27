@@ -76,28 +76,11 @@ export async function getPlaylistById(id: string): Promise<PlaylistWithTasks | n
 
 export async function createPlaylist(data: PlaylistCreateInput): Promise<PlaylistWithTasks> {
   try {
-    const { tasks, activeDays, ...playlistData } = data;
-    
-    return await prisma.$transaction(async (tx) => {
-      const playlist = await tx.playlist.create({
-        data: {
-          ...playlistData,
-          ...activeDays
-        }
-      });
-
-      await tx.task.createMany({
-        data: tasks.map((task, index) => ({
-          ...task,
-          playlistId: playlist.id,
-          order: index + 1
-        }))
-      });
-
-      return await tx.playlist.findUnique({
-        where: { id: playlist.id },
-        include: { tasks: true }
-      }) as PlaylistWithTasks;
+    return await prisma.playlist.create({
+      data: data,
+      include: {
+        tasks: true
+      }
     });
   } catch (error) {
     console.error('Failed to create playlist:', error);
