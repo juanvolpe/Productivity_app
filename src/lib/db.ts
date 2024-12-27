@@ -17,16 +17,24 @@ const prismaOptions = {
     { level: 'error', emit: 'event' },
     { level: 'info', emit: 'event' },
     { level: 'warn', emit: 'event' },
-  ],
+  ] as const,
 };
 
 export const prisma = globalThis.prisma || new PrismaClient(prismaOptions);
 
-prisma.$on('query', (e: any) => {
+type PrismaEvent = {
+  timestamp: Date;
+  query: string;
+  params: string;
+  duration: number;
+  target: string;
+};
+
+prisma.$on('query', (e: PrismaEvent) => {
   logger.debug('Query:', e.query, e.params);
 });
 
-prisma.$on('error', (e: any) => {
+prisma.$on('error', (e: Error) => {
   logger.error('Prisma error:', e);
 });
 
