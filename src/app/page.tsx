@@ -118,13 +118,13 @@ export default function Home() {
       <div className="mb-12">
         <div className="flex items-center justify-center gap-8 mb-8">
           <button
-            onClick={() => changeDate(-7)}
-            className="btn-secondary"
+            onClick={() => changeDate(-1)}
+            className="text-gray-400 hover:text-gray-600 transition-colors"
+            aria-label="Previous Day"
           >
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
             </svg>
-            Previous Week
           </button>
           <div className="text-center">
             <h2 className="page-title mb-2 text-4xl">{dayName}</h2>
@@ -139,29 +139,16 @@ export default function Home() {
             )}
           </div>
           <button
-            onClick={() => changeDate(7)}
-            className="btn-secondary"
+            onClick={() => changeDate(1)}
+            className="text-gray-400 hover:text-gray-600 transition-colors"
+            aria-label="Next Day"
           >
-            Next Week
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
             </svg>
           </button>
         </div>
-        <div className="relative">
-          <div className="absolute inset-0 flex items-center" aria-hidden="true">
-            <div className="w-full border-t border-gray-200"></div>
-          </div>
-          <div className="relative flex justify-center">
-            <div className="bg-[var(--color-background)] px-6">
-              <div className="h-8 w-8 rounded-full bg-gradient-to-r from-indigo-400 to-purple-400 flex items-center justify-center shadow-lg">
-                <svg className="h-4 w-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-                </svg>
-              </div>
-            </div>
-          </div>
-        </div>
+        <div className="border-t border-gray-200"></div>
       </div>
 
       <div className="flex items-center justify-between mb-8">
