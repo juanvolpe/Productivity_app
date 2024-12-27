@@ -64,42 +64,55 @@ export default function Home() {
 
   return (
     <main className="p-4">
-      <h1 className="text-2xl font-bold mb-6">Today's Playlists</h1>
+      <div className="flex items-center justify-between mb-6">
+        <h1 className="text-2xl font-bold">Today's Playlists</h1>
+        <div className="flex gap-4">
+          <Link
+            href="/playlists/new"
+            className="bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600 transition-colors flex items-center gap-2"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+            </svg>
+            Create Playlist
+          </Link>
+          <Link
+            href="/playlists"
+            className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition-colors flex items-center gap-2"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+            </svg>
+            Manage Playlists
+          </Link>
+        </div>
+      </div>
       
       <div className="space-y-4">
-        {playlists.length > 0 && playlists.map((playlist) => (
-          <Link
-            key={playlist.id}
-            href={`/playlist/${playlist.id}`}
-            className="block p-4 rounded-lg border border-gray-200 hover:border-blue-500 transition-colors"
-          >
-            <h2 className="text-lg font-semibold">{playlist.name}</h2>
-            <p className="text-sm text-gray-600">
-              {playlist.tasks.length} tasks
-            </p>
-          </Link>
-        ))}
-      </div>
-
-      <div className="fixed bottom-4 right-4 flex gap-4">
-        <Link
-          href="/playlists/new"
-          className="bg-green-500 text-white p-4 rounded-full shadow-lg hover:bg-green-600 transition-colors"
-          title="Create New Playlist"
-        >
-          <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-          </svg>
-        </Link>
-        <Link
-          href="/playlists"
-          className="bg-blue-500 text-white p-4 rounded-full shadow-lg hover:bg-blue-600 transition-colors"
-          title="Manage Playlists"
-        >
-          <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-          </svg>
-        </Link>
+        {playlists.length === 0 ? (
+          <div className="text-center py-12 bg-gray-50 rounded-lg border border-gray-200">
+            <p className="text-gray-600 mb-4">No playlists scheduled for today</p>
+            <Link
+              href="/playlists/new"
+              className="text-blue-500 hover:text-blue-600 font-medium"
+            >
+              Create your first playlist
+            </Link>
+          </div>
+        ) : (
+          playlists.map((playlist) => (
+            <Link
+              key={playlist.id}
+              href={`/playlist/${playlist.id}`}
+              className="block p-4 rounded-lg border border-gray-200 hover:border-blue-500 transition-colors"
+            >
+              <h2 className="text-lg font-semibold">{playlist.name}</h2>
+              <p className="text-sm text-gray-600">
+                {playlist.tasks.length} tasks
+              </p>
+            </Link>
+          ))
+        )}
       </div>
     </main>
   );
