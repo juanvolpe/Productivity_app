@@ -1,5 +1,37 @@
-import { getTodaysPlaylists } from "@/lib/playlist";
 import Link from "next/link";
+import { prisma } from '@/lib/db';
+import type { Playlist } from '@prisma/client';
+
+type PlaylistWithTasks = Playlist & {
+  tasks: {
+    id: string;
+    title: string;
+    duration: number;
+    isCompleted: boolean;
+    order: number;
+    playlistId: string;
+    createdAt: Date;
+    updatedAt: Date;
+  }[];
+};
+
+async function getTodaysPlaylists(): Promise<PlaylistWithTasks[]> {
+  const days = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
+  const today = days[new Date().getDay()];
+  
+  return await prisma.playlist.findMany({
+    where: {
+      [today]: true
+    },
+    include: {
+      tasks: {
+        orderBy: {
+          order: 'asc'
+        }
+      }
+    }
+  });
+}
 
 export default async function Home() {
   try {
@@ -52,7 +84,7 @@ export default async function Home() {
       <div className="p-4">
         <h1 className="text-2xl font-bold text-red-600">Error</h1>
         <p className="mt-2 text-gray-600">
-          {error instanceof Error ? error.message : 'Failed to load playlists. Please try again later.'}
+          Failed to load playlists. Please try again later.
         </p>
         <div className="mt-4 space-x-4">
           <Link
