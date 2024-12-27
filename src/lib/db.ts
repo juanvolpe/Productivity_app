@@ -11,24 +11,11 @@ logger.info('Initializing Prisma client with environment:', {
   hasDbUrl: !!process.env.DATABASE_URL
 });
 
-const prismaOptions = {
-  log: [
-    { level: 'query' as const, emit: 'event' as const },
-    { level: 'error' as const, emit: 'event' as const },
-    { level: 'info' as const, emit: 'event' as const },
-    { level: 'warn' as const, emit: 'event' as const },
-  ],
-};
-
-export const prisma = globalThis.prisma || new PrismaClient(prismaOptions);
-
-// Remove custom event type and use any temporarily to get past build
-prisma.$on('query' as any, (e: any) => {
-  logger.debug('Query:', e.query, e.params);
+// Simplified Prisma client without event handlers
+export const prisma = globalThis.prisma || new PrismaClient({
+  log: ['error', 'warn'],
 });
 
-prisma.$on('error' as any, (e: any) => {
-  logger.error('Prisma error:', e);
-});
-
-if (process.env.NODE_ENV !== 'production') globalThis.prisma = prisma; 
+if (process.env.NODE_ENV !== 'production') {
+  globalThis.prisma = prisma;
+} 
