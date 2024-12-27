@@ -3,7 +3,6 @@
 import { useEffect, useState } from 'react';
 import Link from "next/link";
 import { PlaylistWithTasks } from '@/types/playlist';
-import { getIconPath } from '@/lib/icons';
 
 function formatDate(date: Date) {
   const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
@@ -198,20 +197,13 @@ export default function Home() {
                 className="card block hover:border-indigo-200 group"
               >
                 <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-4">
-                    <div className="w-10 h-10 rounded-full bg-indigo-50 flex items-center justify-center group-hover:bg-indigo-100 transition-colors">
-                      <svg className="w-5 h-5 text-indigo-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={getIconPath(playlist.icon)} />
-                      </svg>
-                    </div>
-                    <div>
-                      <h2 className="text-lg font-semibold group-hover:text-indigo-600 transition-colors">
-                        {playlist.name}
-                      </h2>
-                      <p className="text-sm text-gray-500">
-                        {playlist.tasks.length} tasks
-                      </p>
-                    </div>
+                  <div>
+                    <h2 className="text-lg font-semibold group-hover:text-indigo-600 transition-colors">
+                      {playlist.name}
+                    </h2>
+                    <p className="text-sm text-gray-500">
+                      {playlist.tasks.length} tasks
+                    </p>
                   </div>
                   <div className="flex items-center gap-3">
                     <span className={`px-3 py-1 rounded-full text-sm font-medium ${statusColor}`}>

@@ -1,8 +1,6 @@
 export interface PlaylistWithTasks {
   id: string;
   name: string;
-  description?: string;
-  icon: string;
   tasks: {
     id: string;
     title: string;

@@ -1,7 +1,6 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
 import { logger } from '@/lib/logger';
-import { suggestIcon } from '@/lib/icons';
 
 export async function GET() {
   try {
@@ -28,16 +27,8 @@ export async function GET() {
 export async function POST(request: Request) {
   try {
     const data = await request.json();
-    
-    // Add suggested icon based on playlist name
-    const icon = suggestIcon(data.name);
-    const playlistData = {
-      ...data,
-      icon
-    };
-    
     const playlist = await prisma.playlist.create({
-      data: playlistData,
+      data,
       include: {
         tasks: true
       }

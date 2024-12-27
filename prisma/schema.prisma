@@ -5,6 +5,7 @@ generator client {
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
 }
 
 model Task {
@@ -24,8 +25,6 @@ model Task {
 model Playlist {
   id          String    @id @default(cuid())
   name        String
-  description String?   // Optional description field
-  icon        String    @default("list-bullet")  // Default icon from heroicons
   tasks       Task[]
   monday      Boolean   @default(false)
   tuesday     Boolean   @default(false)
