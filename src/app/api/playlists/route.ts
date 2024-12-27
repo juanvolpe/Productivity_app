@@ -4,13 +4,7 @@ import { logger } from '@/lib/logger';
 
 export async function GET() {
   try {
-    const days = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
-    const today = days[new Date().getDay()];
-    
     const playlists = await prisma.playlist.findMany({
-      where: {
-        [today]: true
-      },
       include: {
         tasks: {
           orderBy: {
@@ -45,6 +39,32 @@ export async function POST(request: Request) {
     logger.error('Failed to create playlist:', error);
     return NextResponse.json(
       { error: 'Failed to create playlist' },
+      { status: 500 }
+    );
+  }
+}
+
+export async function DELETE(request: Request) {
+  try {
+    const { searchParams } = new URL(request.url);
+    const id = searchParams.get('id');
+    
+    if (!id) {
+      return NextResponse.json(
+        { error: 'Playlist ID is required' },
+        { status: 400 }
+      );
+    }
+
+    await prisma.playlist.delete({
+      where: { id }
+    });
+    
+    return NextResponse.json({ success: true });
+  } catch (error) {
+    logger.error('Failed to delete playlist:', error);
+    return NextResponse.json(
+      { error: 'Failed to delete playlist' },
       { status: 500 }
     );
   }
