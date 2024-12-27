@@ -1,6 +1,7 @@
 import { prisma } from './db';
 import type { Prisma } from '@prisma/client';
 import { PlaylistWithTasks, PlaylistCreateInput } from '@/types/playlist';
+import { logger } from '@/lib/logger';
 
 export class PlaylistError extends Error {
   constructor(message: string, public code: string) {
@@ -11,10 +12,12 @@ export class PlaylistError extends Error {
 
 export async function getTodaysPlaylists(): Promise<PlaylistWithTasks[]> {
   try {
+    logger.info('Fetching today\'s playlists');
     const days = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
     const today = days[new Date().getDay()];
-    
-    return await prisma.playlist.findMany({
+    logger.debug('Today is:', today);
+
+    const playlists = await prisma.playlist.findMany({
       where: {
         [today]: true
       },
@@ -26,8 +29,11 @@ export async function getTodaysPlaylists(): Promise<PlaylistWithTasks[]> {
         }
       }
     });
+
+    logger.info(`Found ${playlists.length} playlists for today`);
+    return playlists;
   } catch (error) {
-    console.error('Failed to fetch today\'s playlists:', error);
+    logger.error('Failed to fetch today\'s playlists:', error);
     throw new PlaylistError('Failed to fetch playlists', 'FETCH_ERROR');
   }
 }
