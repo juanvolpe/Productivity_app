@@ -5,16 +5,12 @@ export default async function Home() {
   try {
     const playlists = await getTodaysPlaylists();
     
-    if (!playlists) {
-      throw new Error('Failed to load playlists');
-    }
-
     return (
       <main className="p-4">
         <h1 className="text-2xl font-bold mb-6">Today's Playlists</h1>
         
         <div className="space-y-4">
-          {playlists.map((playlist) => (
+          {playlists.length > 0 && playlists.map((playlist) => (
             <Link
               key={playlist.id}
               href={`/playlist/${playlist.id}`}
@@ -28,21 +24,50 @@ export default async function Home() {
           ))}
         </div>
 
-        <Link
-          href="/playlists"
-          className="fixed bottom-4 right-4 bg-blue-500 text-white p-4 rounded-full shadow-lg hover:bg-blue-600 transition-colors"
-        >
-          Manage Playlists
-        </Link>
+        <div className="fixed bottom-4 right-4 flex gap-4">
+          <Link
+            href="/playlists/new"
+            className="bg-green-500 text-white p-4 rounded-full shadow-lg hover:bg-green-600 transition-colors"
+            title="Create New Playlist"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+            </svg>
+          </Link>
+          <Link
+            href="/playlists"
+            className="bg-blue-500 text-white p-4 rounded-full shadow-lg hover:bg-blue-600 transition-colors"
+            title="Manage Playlists"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+            </svg>
+          </Link>
+        </div>
       </main>
     );
   } catch (error) {
+    console.error('Home page error:', error);
     return (
       <div className="p-4">
         <h1 className="text-2xl font-bold text-red-600">Error</h1>
         <p className="mt-2 text-gray-600">
           {error instanceof Error ? error.message : 'Failed to load playlists. Please try again later.'}
         </p>
+        <div className="mt-4 space-x-4">
+          <Link
+            href="/playlists/new"
+            className="inline-block bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600 transition-colors"
+          >
+            Create Playlist
+          </Link>
+          <Link
+            href="/playlists"
+            className="inline-block bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition-colors"
+          >
+            Manage Playlists
+          </Link>
+        </div>
       </div>
     );
   }
