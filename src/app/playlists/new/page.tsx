@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { PlaylistCreateInput } from '@/types/playlist';
 
 interface TaskInput {
+  id: string;
   title: string;
   duration: number;
   isCompleted: boolean;
@@ -16,6 +17,7 @@ export default function NewPlaylistPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [name, setName] = useState('');
   const [tasks, setTasks] = useState<TaskInput[]>([]);
+  const [draggedTask, setDraggedTask] = useState<number | null>(null);
   const [activeDays, setActiveDays] = useState({
     monday: false,
     tuesday: false,
@@ -30,6 +32,7 @@ export default function NewPlaylistPage() {
     setTasks([
       ...tasks,
       {
+        id: `task-${Date.now()}`,
         title: '',
         duration: 5,
         isCompleted: false,
@@ -42,6 +45,38 @@ export default function NewPlaylistPage() {
     setTasks(prev => prev.map((task, i) => 
       i === index ? { ...task, [field]: value } : task
     ));
+  };
+
+  const handleDragStart = (e: React.DragEvent, index: number) => {
+    setDraggedTask(index);
+    e.currentTarget.classList.add('opacity-50');
+  };
+
+  const handleDragEnd = (e: React.DragEvent) => {
+    e.currentTarget.classList.remove('opacity-50');
+    setDraggedTask(null);
+  };
+
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+  };
+
+  const handleDrop = (e: React.DragEvent, dropIndex: number) => {
+    e.preventDefault();
+    if (draggedTask === null) return;
+
+    const newTasks = [...tasks];
+    const [draggedItem] = newTasks.splice(draggedTask, 1);
+    newTasks.splice(dropIndex, 0, draggedItem);
+
+    // Update order property for all tasks
+    const updatedTasks = newTasks.map((task, index) => ({
+      ...task,
+      order: index + 1,
+    }));
+
+    setTasks(updatedTasks);
+    setDraggedTask(null);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -133,7 +168,16 @@ export default function NewPlaylistPage() {
         <h3 className="text-lg font-medium mb-2">Tasks</h3>
         <div className="space-y-4">
           {tasks.map((task, index) => (
-            <div key={index} className="flex gap-2">
+            <div
+              key={task.id}
+              draggable
+              onDragStart={(e) => handleDragStart(e, index)}
+              onDragEnd={handleDragEnd}
+              onDragOver={handleDragOver}
+              onDrop={(e) => handleDrop(e, index)}
+              className="flex gap-2 items-center bg-white p-2 rounded-md shadow-sm border border-gray-200 cursor-move transition-opacity duration-200"
+            >
+              <div className="text-gray-400">☰</div>
               <input
                 type="text"
                 value={task.title}
@@ -160,14 +204,14 @@ export default function NewPlaylistPage() {
               </button>
             </div>
           ))}
-          <button
-            type="button"
-            onClick={handleAddTask}
-            className="w-full p-2 border-2 border-dashed border-gray-300 rounded-md text-gray-500 hover:border-blue-500 hover:text-blue-500"
-          >
-            Add Task
-          </button>
         </div>
+        <button
+          type="button"
+          onClick={handleAddTask}
+          className="w-full mt-4 p-2 border-2 border-dashed border-gray-300 rounded-md text-gray-500 hover:border-blue-500 hover:text-blue-500"
+        >
+          Add Task
+        </button>
       </div>
 
       <button
