@@ -1,0 +1,24 @@
+services:
+  - type: web
+    name: productivity-app
+    env: node
+    buildCommand: ./build.sh
+    startCommand: npm start
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: productivity-app-db
+          property: connectionString
+      - key: NODE_ENV
+        value: production
+    buildFilter:
+      paths:
+        - src/**
+        - prisma/**
+        - package.json
+        - next.config.js
+        - tsconfig.json
+
+databases:
+  - name: productivity-app-db
+    plan: free 
