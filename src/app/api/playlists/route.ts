@@ -11,6 +11,9 @@ export async function GET() {
         tasks: {
           orderBy: {
             order: 'asc'
+          },
+          include: {
+            completions: true
           }
         }
       },
