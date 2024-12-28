@@ -40,6 +40,7 @@ export default function PlaylistsClient({ initialPlaylists }: PlaylistsClientPro
         throw new Error('Failed to delete playlist');
       }
 
+      setPlaylists(playlists.filter(p => p.id !== playlistId));
       router.refresh();
     } catch (error) {
       console.error('Failed to delete playlist:', error);

@@ -13,6 +13,9 @@ export async function GET(
         tasks: {
           orderBy: {
             order: 'asc'
+          },
+          include: {
+            completions: true
           }
         }
       }
@@ -25,6 +28,22 @@ export async function GET(
     return NextResponse.json(playlist);
   } catch (error) {
     logger.error('Failed to fetch playlist:', error);
+    return new NextResponse('Internal Server Error', { status: 500 });
+  }
+}
+
+export async function DELETE(
+  request: Request,
+  { params }: { params: { id: string } }
+) {
+  try {
+    await prisma.playlist.delete({
+      where: { id: params.id }
+    });
+
+    return new NextResponse('Playlist deleted successfully');
+  } catch (error) {
+    logger.error('Failed to delete playlist:', error);
     return new NextResponse('Internal Server Error', { status: 500 });
   }
 }
