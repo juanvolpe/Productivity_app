@@ -25,6 +25,9 @@ export async function getTodaysPlaylists(): Promise<PlaylistWithTasks[]> {
         tasks: {
           orderBy: {
             order: 'asc'
+          },
+          include: {
+            completions: true
           }
         }
       }
@@ -45,6 +48,9 @@ export async function getAllPlaylists(): Promise<PlaylistWithTasks[]> {
         tasks: {
           orderBy: {
             order: 'asc'
+          },
+          include: {
+            completions: true
           }
         }
       }
@@ -63,6 +69,9 @@ export async function getPlaylistById(id: string): Promise<PlaylistWithTasks | n
         tasks: {
           orderBy: {
             order: 'asc'
+          },
+          include: {
+            completions: true
           }
         }
       }
