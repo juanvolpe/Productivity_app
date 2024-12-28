@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { PlaylistWithTasks } from '@/types/playlist';
-import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 
 interface TaskWithTimer {
   id: string;
@@ -21,6 +21,7 @@ interface PlaylistTimerProps {
 }
 
 export default function PlaylistTimer({ playlist }: PlaylistTimerProps) {
+  const router = useRouter();
   const [currentTaskIndex, setCurrentTaskIndex] = useState(0);
   const [isRunning, setIsRunning] = useState(false);
   const [tasks, setTasks] = useState<TaskWithTimer[]>(() => 
@@ -30,9 +31,31 @@ export default function PlaylistTimer({ playlist }: PlaylistTimerProps) {
     }))
   );
 
-  const calculateProgress = () => {
-    const completedTasks = tasks.filter(task => task.isCompleted).length;
-    return (completedTasks / tasks.length) * 100;
+  const handleCleanup = async () => {
+    if (!confirm('Are you sure you want to reset all task progress? This will mark all tasks as incomplete.')) return;
+    
+    try {
+      const response = await fetch(`/api/playlists/${playlist.id}/tasks/cleanup`, {
+        method: 'POST',
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to cleanup tasks');
+      }
+
+      setTasks(prev => prev.map(task => ({
+        ...task,
+        isCompleted: false,
+        timeLeft: task.duration * 60
+      })));
+      
+      setCurrentTaskIndex(0);
+      setIsRunning(false);
+      router.refresh();
+    } catch (error) {
+      console.error('Failed to cleanup tasks:', error);
+      alert('Failed to cleanup tasks. Please try again.');
+    }
   };
 
   useEffect(() => {
@@ -77,6 +100,8 @@ export default function PlaylistTimer({ playlist }: PlaylistTimerProps) {
       if (currentTaskIndex < tasks.length - 1) {
         setCurrentTaskIndex(prev => prev + 1);
       }
+      
+      router.refresh();
     } catch (error) {
       console.error('Failed to complete task:', error);
       alert('Failed to mark task as complete. Please try again.');
@@ -110,6 +135,8 @@ export default function PlaylistTimer({ playlist }: PlaylistTimerProps) {
           ? { ...task, isCompleted: false, timeLeft: task.duration * 60 }
           : task
       ));
+      
+      router.refresh();
     } catch (error) {
       console.error('Failed to restart task:', error);
       alert('Failed to restart task. Please try again.');
@@ -222,8 +249,8 @@ export default function PlaylistTimer({ playlist }: PlaylistTimerProps) {
         </div>
       ))}
 
-      <div className="flex justify-center pt-8">
-        <Link
+      <div className="flex justify-center gap-4 pt-8">
+        <a
           href="/"
           className="bg-gray-100 text-gray-700 px-6 py-3 rounded-lg hover:bg-gray-200 transition-colors flex items-center gap-2"
         >
@@ -231,7 +258,16 @@ export default function PlaylistTimer({ playlist }: PlaylistTimerProps) {
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
           </svg>
           Back to Today
-        </Link>
+        </a>
+        <button
+          onClick={handleCleanup}
+          className="bg-red-100 text-red-700 px-6 py-3 rounded-lg hover:bg-red-200 transition-colors flex items-center gap-2"
+        >
+          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+          </svg>
+          Reset Progress
+        </button>
       </div>
     </div>
   );
