@@ -94,7 +94,11 @@ export async function createPlaylist(data: PlaylistCreateInput): Promise<Playlis
     return await prisma.playlist.create({
       data: data,
       include: {
-        tasks: true
+        tasks: {
+          include: {
+            completions: true
+          }
+        }
       }
     });
   } catch (error) {
