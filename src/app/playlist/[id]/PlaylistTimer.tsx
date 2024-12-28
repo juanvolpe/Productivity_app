@@ -30,6 +30,11 @@ export default function PlaylistTimer({ playlist }: PlaylistTimerProps) {
     }))
   );
 
+  const calculateProgress = () => {
+    const completedTasks = tasks.filter(task => task.isCompleted).length;
+    return (completedTasks / tasks.length) * 100;
+  };
+
   useEffect(() => {
     let timer: NodeJS.Timeout;
     if (isRunning && tasks[currentTaskIndex]?.timeLeft > 0) {
@@ -78,6 +83,39 @@ export default function PlaylistTimer({ playlist }: PlaylistTimerProps) {
     }
   };
 
+  const handleTaskSelect = (index: number) => {
+    if (index === currentTaskIndex) return;
+    setIsRunning(false);
+    setCurrentTaskIndex(index);
+  };
+
+  const handleRestart = async () => {
+    try {
+      setIsRunning(false);
+      
+      const response = await fetch(`/api/playlists/${playlist.id}/tasks/${tasks[currentTaskIndex].id}`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ isCompleted: false }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to update task');
+      }
+
+      setTasks(prev => prev.map((task, index) => 
+        index === currentTaskIndex 
+          ? { ...task, isCompleted: false, timeLeft: task.duration * 60 }
+          : task
+      ));
+    } catch (error) {
+      console.error('Failed to restart task:', error);
+      alert('Failed to restart task. Please try again.');
+    }
+  };
+
   const formatTime = (seconds: number) => {
     const minutes = Math.floor(seconds / 60);
     const remainingSeconds = seconds % 60;
@@ -86,14 +124,27 @@ export default function PlaylistTimer({ playlist }: PlaylistTimerProps) {
 
   return (
     <div className="space-y-6">
+      <div className="mb-8">
+        <div className="flex justify-between items-center mb-2">
+          <span className="text-sm text-gray-600">Overall Progress</span>
+          <span className="text-sm font-medium text-gray-900">{Math.round(calculateProgress())}%</span>
+        </div>
+        <div className="w-full bg-gray-200 rounded-full h-2">
+          <div
+            className="bg-blue-500 h-2 rounded-full transition-all duration-300"
+            style={{ width: `${calculateProgress()}%` }}
+          />
+        </div>
+      </div>
+
       {tasks.map((task, index) => (
         <div
           key={task.id}
+          onClick={() => handleTaskSelect(index)}
           className={`
-            border rounded-xl shadow-sm transition-all duration-300
-            ${index === currentTaskIndex ? 'ring-2 ring-blue-500 bg-white' : 'bg-white'}
+            border rounded-xl shadow-sm transition-all duration-300 cursor-pointer
+            ${index === currentTaskIndex ? 'ring-2 ring-blue-500 bg-white' : 'bg-white hover:border-gray-300'}
             ${task.isCompleted ? 'bg-green-50' : ''}
-            ${index > currentTaskIndex ? 'opacity-60' : ''}
             ${index === currentTaskIndex ? 'p-6' : 'p-4'}
           `}
         >
@@ -117,7 +168,7 @@ export default function PlaylistTimer({ playlist }: PlaylistTimerProps) {
             )}
           </div>
           
-          {index === currentTaskIndex && !task.isCompleted && (
+          {index === currentTaskIndex && (
             <div className="mt-6">
               <div className="bg-gray-50 rounded-lg p-4 mb-4">
                 <div className="text-3xl font-bold text-gray-900 text-center">
@@ -133,37 +184,51 @@ export default function PlaylistTimer({ playlist }: PlaylistTimerProps) {
                 </div>
               </div>
               <div className="flex justify-center gap-3">
-                {!isRunning ? (
+                {task.isCompleted ? (
                   <button
-                    onClick={handleStart}
+                    onClick={handleRestart}
                     className="bg-blue-500 text-white px-6 py-2 rounded-lg hover:bg-blue-600 transition-colors flex items-center gap-2"
                   >
                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
                     </svg>
-                    Start
+                    Restart Task
                   </button>
                 ) : (
-                  <button
-                    onClick={handlePause}
-                    className="bg-yellow-500 text-white px-6 py-2 rounded-lg hover:bg-yellow-600 transition-colors flex items-center gap-2"
-                  >
-                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 9v6m4-6v6m7-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
-                    Pause
-                  </button>
+                  <>
+                    {!isRunning ? (
+                      <button
+                        onClick={handleStart}
+                        className="bg-blue-500 text-white px-6 py-2 rounded-lg hover:bg-blue-600 transition-colors flex items-center gap-2"
+                      >
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        Start
+                      </button>
+                    ) : (
+                      <button
+                        onClick={handlePause}
+                        className="bg-yellow-500 text-white px-6 py-2 rounded-lg hover:bg-yellow-600 transition-colors flex items-center gap-2"
+                      >
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 9v6m4-6v6m7-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        Pause
+                      </button>
+                    )}
+                    <button
+                      onClick={handleComplete}
+                      className="bg-green-500 text-white px-6 py-2 rounded-lg hover:bg-green-600 transition-colors flex items-center gap-2"
+                    >
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                      </svg>
+                      Complete
+                    </button>
+                  </>
                 )}
-                <button
-                  onClick={handleComplete}
-                  className="bg-green-500 text-white px-6 py-2 rounded-lg hover:bg-green-600 transition-colors flex items-center gap-2"
-                >
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                  </svg>
-                  Complete
-                </button>
               </div>
             </div>
           )}

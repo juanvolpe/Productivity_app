@@ -40,30 +40,29 @@ export default async function PlaylistPage({
     return (
       <div>
         <div className="sticky top-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-sm shadow-sm border-b border-gray-100">
-          <div className="max-w-3xl mx-auto px-6 py-3">
-            <div className="flex items-center justify-between">
-              <h1 className="text-lg font-semibold text-gray-900 truncate">{playlist.name}</h1>
-              
-              <div className="flex items-center gap-6">
-                <div className="flex items-center gap-2">
-                  <span className="text-sm font-medium text-blue-600">
-                    {hours > 0 ? `${hours}h ` : ''}{minutes}m
-                  </span>
-                </div>
+          <div className="max-w-3xl mx-auto px-6 py-2">
+            <div className="flex items-start justify-between gap-4">
+              <div className="min-w-0">
+                <h1 className="text-sm font-medium text-gray-900 line-clamp-2 leading-tight">
+                  {playlist.name}
+                </h1>
+                <span className="text-xs text-gray-500 mt-0.5 block">
+                  {hours > 0 ? `${hours}h ` : ''}{minutes}m total
+                </span>
+              </div>
 
-                <div className="flex items-center gap-3 min-w-[150px]">
-                  <div className="flex-1 bg-gray-200 rounded-full h-1.5">
-                    <div 
-                      className="bg-green-500 h-1.5 rounded-full transition-all duration-300"
-                      style={{ 
-                        width: `${(playlist.tasks.filter((t: Task) => t.isCompleted).length / playlist.tasks.length) * 100}%` 
-                      }}
-                    />
-                  </div>
-                  <span className="text-xs font-medium text-gray-600 whitespace-nowrap">
-                    {playlist.tasks.filter((t: Task) => t.isCompleted).length}/{playlist.tasks.length}
-                  </span>
+              <div className="flex items-center gap-3 min-w-[120px] pt-1">
+                <div className="flex-1 bg-gray-200 rounded-full h-1.5">
+                  <div 
+                    className="bg-green-500 h-1.5 rounded-full transition-all duration-300"
+                    style={{ 
+                      width: `${(playlist.tasks.filter((t: Task) => t.isCompleted).length / playlist.tasks.length) * 100}%` 
+                    }}
+                  />
                 </div>
+                <span className="text-xs font-medium text-gray-600 whitespace-nowrap">
+                  {playlist.tasks.filter((t: Task) => t.isCompleted).length}/{playlist.tasks.length}
+                </span>
               </div>
             </div>
           </div>
