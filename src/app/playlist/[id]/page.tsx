@@ -38,37 +38,30 @@ export default async function PlaylistPage({
     const minutes = totalDuration % 60;
 
     return (
-      <div>
-        <div className="sticky top-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-sm shadow-sm border-b border-gray-100">
-          <div className="max-w-3xl mx-auto px-6 py-2">
-            <div className="flex items-start justify-between gap-4">
-              <div className="min-w-0">
-                <h1 className="text-sm font-medium text-gray-900 line-clamp-2 leading-tight">
-                  {playlist.name}
-                </h1>
-                <span className="text-xs text-gray-500 mt-0.5 block">
-                  {hours > 0 ? `${hours}h ` : ''}{minutes}m total
-                </span>
+      <div className="min-h-screen bg-gray-50">
+        <div className="sticky top-0 bg-white border-b shadow-sm z-10">
+          <div className="max-w-4xl mx-auto px-4 py-4">
+            <div className="flex justify-between items-center">
+              <h1 className="text-xl font-semibold text-gray-900">{playlist.name}</h1>
+              <div className="text-sm text-gray-500">
+                {playlist.tasks.length} tasks
               </div>
-
-              <div className="flex items-center gap-3 min-w-[120px] pt-1">
-                <div className="flex-1 bg-gray-200 rounded-full h-1.5">
-                  <div 
-                    className="bg-green-500 h-1.5 rounded-full transition-all duration-300"
-                    style={{ 
-                      width: `${(playlist.tasks.filter((t: Task) => t.isCompleted).length / playlist.tasks.length) * 100}%` 
-                    }}
-                  />
-                </div>
-                <span className="text-xs font-medium text-gray-600 whitespace-nowrap">
-                  {playlist.tasks.filter((t: Task) => t.isCompleted).length}/{playlist.tasks.length}
-                </span>
+            </div>
+            <div className="mt-2">
+              <div className="flex justify-between items-center mb-2">
+                <span className="text-sm text-gray-600">Progress</span>
+                <span className="text-sm font-medium text-gray-900">0%</span>
+              </div>
+              <div className="w-full bg-gray-200 rounded-full h-2">
+                <div
+                  className="bg-blue-500 h-2 rounded-full transition-all duration-300"
+                  style={{ width: '0%' }}
+                />
               </div>
             </div>
           </div>
         </div>
-
-        <main className="max-w-3xl mx-auto p-6">
+        <main className="max-w-4xl mx-auto p-4">
           <PlaylistTimer playlist={playlist} />
         </main>
       </div>
