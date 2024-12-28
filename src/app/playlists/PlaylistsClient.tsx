@@ -34,13 +34,25 @@ export default function PlaylistsClient({ initialPlaylists }: PlaylistsClientPro
     try {
       const response = await fetch(`/api/playlists/${playlistId}`, {
         method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json'
+        }
       });
 
+      const data = await response.json();
+
       if (!response.ok) {
-        throw new Error('Failed to delete playlist');
+        throw new Error(data.error || 'Failed to delete playlist');
       }
 
+      // Remove the playlist from local state
       setPlaylists(playlists.filter(p => p.id !== playlistId));
+      
+      // Show success animation
+      setShowSuccess(true);
+      setTimeout(() => setShowSuccess(false), 2000);
+      
+      // Refresh the page data
       router.refresh();
     } catch (error) {
       console.error('Failed to delete playlist:', error);

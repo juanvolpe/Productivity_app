@@ -37,14 +37,26 @@ export async function DELETE(
   { params }: { params: { id: string } }
 ) {
   try {
+    logger.info('Deleting playlist:', params.id);
+    
+    // First delete all tasks associated with the playlist
+    await prisma.task.deleteMany({
+      where: { playlistId: params.id }
+    });
+
+    // Then delete the playlist
     await prisma.playlist.delete({
       where: { id: params.id }
     });
 
-    return new NextResponse('Playlist deleted successfully');
+    logger.info('Playlist deleted successfully:', params.id);
+    return NextResponse.json({ message: 'Playlist deleted successfully' });
   } catch (error) {
     logger.error('Failed to delete playlist:', error);
-    return new NextResponse('Internal Server Error', { status: 500 });
+    return NextResponse.json(
+      { error: 'Failed to delete playlist' },
+      { status: 500 }
+    );
   }
 }
 
