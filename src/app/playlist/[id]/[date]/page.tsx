@@ -6,6 +6,9 @@ import { PlaylistWithTasks } from '@/types/playlist';
 
 type Task = PlaylistWithTasks['tasks'][0];
 
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
 export default async function PlaylistDatePage({
   params
 }: {
