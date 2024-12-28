@@ -159,7 +159,9 @@ export default function Home() {
         ) : (
           playlists.map((playlist) => {
             // Calculate completion status
-            const completedTasks = playlist.tasks.filter(task => task.completions.length > 0).length;
+            const completedTasks = playlist.tasks.filter(task => 
+              Array.isArray(task.completions) && task.completions.length > 0
+            ).length;
             const totalTasks = playlist.tasks.length;
             let status = "Not Started";
             if (completedTasks === totalTasks && totalTasks > 0) {
