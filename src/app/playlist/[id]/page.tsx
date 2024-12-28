@@ -37,6 +37,10 @@ export default async function PlaylistPage({
     const hours = Math.floor(totalDuration / 60);
     const minutes = totalDuration % 60;
 
+    // Calculate completion percentage
+    const completedTasks = playlist.tasks.filter((task: Task) => task.isCompleted).length;
+    const completionPercentage = (completedTasks / playlist.tasks.length) * 100;
+
     return (
       <div className="min-h-screen bg-gray-50">
         <div className="sticky top-0 bg-white border-b shadow-sm z-10">
@@ -50,12 +54,12 @@ export default async function PlaylistPage({
             <div className="mt-2">
               <div className="flex justify-between items-center mb-2">
                 <span className="text-sm text-gray-600">Progress</span>
-                <span className="text-sm font-medium text-gray-900">0%</span>
+                <span className="text-sm font-medium text-gray-900">{Math.round(completionPercentage)}%</span>
               </div>
               <div className="w-full bg-gray-200 rounded-full h-2">
                 <div
                   className="bg-blue-500 h-2 rounded-full transition-all duration-300"
-                  style={{ width: '0%' }}
+                  style={{ width: `${completionPercentage}%` }}
                 />
               </div>
             </div>
