@@ -158,9 +158,12 @@ export default function Home() {
           </div>
         ) : (
           playlists.map((playlist) => {
-            // Calculate completion status
+            // Calculate completion status for today only
             const completedTasks = playlist.tasks.filter(task => 
-              Array.isArray(task.completions) && task.completions.length > 0
+              Array.isArray(task.completions) && 
+              task.completions.some(completion => 
+                new Date(completion.date).toISOString().split('T')[0] === dateString
+              )
             ).length;
             const totalTasks = playlist.tasks.length;
             let status = "Not Started";
