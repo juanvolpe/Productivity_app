@@ -1,6 +1,6 @@
 import { prisma } from './db';
 import type { Prisma } from '@prisma/client';
-import { PlaylistWithTasks, PlaylistCreateInput } from '@/types/playlist';
+import { PlaylistWithTasks, PlaylistCreateInput, Task, TaskCompletion } from '@/types/playlist';
 import { logger } from './logger';
 
 export class PlaylistError extends Error {
@@ -91,8 +91,25 @@ export async function getPlaylistById(id: string): Promise<PlaylistWithTasks | n
 
 export async function createPlaylist(data: PlaylistCreateInput): Promise<PlaylistWithTasks> {
   try {
-    return await prisma.playlist.create({
-      data: data,
+    const playlist = await prisma.playlist.create({
+      data: {
+        name: data.name,
+        monday: data.monday,
+        tuesday: data.tuesday,
+        wednesday: data.wednesday,
+        thursday: data.thursday,
+        friday: data.friday,
+        saturday: data.saturday,
+        sunday: data.sunday,
+        tasks: {
+          create: data.tasks.create.map(task => ({
+            title: task.title,
+            duration: task.duration,
+            isCompleted: task.isCompleted,
+            order: task.order,
+          }))
+        }
+      },
       include: {
         tasks: {
           include: {
@@ -101,6 +118,14 @@ export async function createPlaylist(data: PlaylistCreateInput): Promise<Playlis
         }
       }
     });
+
+    return {
+      ...playlist,
+      tasks: playlist.tasks.map((task: { completions?: TaskCompletion[] } & Task) => ({
+        ...task,
+        completions: task.completions || []
+      }))
+    };
   } catch (error) {
     console.error('Failed to create playlist:', error);
     throw new PlaylistError('Failed to create playlist', 'CREATE_ERROR');
