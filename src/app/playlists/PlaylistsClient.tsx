@@ -85,6 +85,36 @@ export default function PlaylistsClient({ initialPlaylists }: PlaylistsClientPro
     }
   };
 
+  const handleDeleteAll = async () => {
+    if (!confirm('Are you sure you want to delete ALL playlists? This action cannot be undone.')) return;
+
+    try {
+      // Process playlists sequentially to avoid overwhelming the server
+      for (const playlist of playlists) {
+        const response = await fetch(`/api/playlists/${playlist.id}`, {
+          method: 'DELETE',
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        });
+
+        if (!response.ok) {
+          const data = await response.json();
+          throw new Error(data.error || 'Failed to delete playlist');
+        }
+      }
+
+      // Clear all playlists from local state
+      setPlaylists([]);
+      
+      // Refresh the page data
+      router.refresh();
+    } catch (error) {
+      console.error('Failed to delete playlists:', error);
+      alert('Failed to delete playlists. Please try again.');
+    }
+  };
+
   const today = new Date();
   today.setHours(0, 0, 0, 0);
   const dateString = today.toISOString().split('T')[0];
@@ -107,6 +137,12 @@ export default function PlaylistsClient({ initialPlaylists }: PlaylistsClientPro
           }`}
         >
           {isCleaningUp ? 'Cleaning...' : 'Clean Up All'}
+        </button>
+        <button
+          onClick={handleDeleteAll}
+          className="w-full bg-red-500 text-white px-4 py-2 rounded-md hover:bg-red-600 text-center"
+        >
+          Delete All
         </button>
       </div>
 
