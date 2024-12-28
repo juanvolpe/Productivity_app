@@ -132,96 +132,100 @@ export default function NewPlaylistPage() {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="p-4 space-y-6">
-      <div>
-        <label className="block text-sm font-medium text-gray-700">
-          Playlist Name
+    <main className="p-8 max-w-4xl mx-auto">
+      <h1 className="page-title mb-8">Create New Playlist</h1>
+      <form onSubmit={handleSubmit} className="space-y-8">
+        <div>
+          <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-2">
+            Playlist Name
+          </label>
           <input
             type="text"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+            id="name"
+            name="name"
             required
+            className="w-full px-4 py-3 rounded-lg border border-gray-300 bg-white shadow-sm focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 text-gray-900"
+            placeholder="Enter playlist name"
           />
-        </label>
-      </div>
-
-      <div>
-        <h3 className="text-lg font-medium mb-2">Active Days</h3>
-        <div className="grid grid-cols-7 gap-2">
-          {Object.entries(activeDays).map(([day, isActive]) => (
-            <button
-              key={day}
-              type="button"
-              onClick={() => setActiveDays(prev => ({ ...prev, [day]: !isActive }))}
-              className={`p-2 text-sm rounded ${
-                isActive ? 'bg-blue-500 text-white' : 'bg-gray-100'
-              }`}
-            >
-              {day.charAt(0).toUpperCase()}
-            </button>
-          ))}
         </div>
-      </div>
 
-      <div>
-        <h3 className="text-lg font-medium mb-2">Tasks</h3>
-        <div className="space-y-4">
-          {tasks.map((task, index) => (
-            <div
-              key={task.id}
-              draggable
-              onDragStart={(e) => handleDragStart(e, index)}
-              onDragEnd={handleDragEnd}
-              onDragOver={handleDragOver}
-              onDrop={(e) => handleDrop(e, index)}
-              className="flex gap-2 items-center bg-white p-2 rounded-md shadow-sm border border-gray-200 cursor-move transition-opacity duration-200"
-            >
-              <div className="text-gray-400">☰</div>
-              <input
-                type="text"
-                value={task.title}
-                onChange={(e) => handleTaskChange(index, 'title', e.target.value)}
-                placeholder="Task name"
-                className="flex-1 rounded-md border-gray-300"
-                required
-              />
-              <input
-                type="number"
-                value={task.duration}
-                onChange={(e) => handleTaskChange(index, 'duration', parseInt(e.target.value) || 0)}
-                placeholder="Minutes"
-                className="w-20 rounded-md border-gray-300"
-                required
-                min="1"
-              />
+        <div>
+          <h3 className="text-lg font-medium mb-2">Active Days</h3>
+          <div className="grid grid-cols-7 gap-2">
+            {Object.entries(activeDays).map(([day, isActive]) => (
               <button
+                key={day}
                 type="button"
-                onClick={() => setTasks(prev => prev.filter((_, i) => i !== index))}
-                className="text-red-500 hover:text-red-600"
+                onClick={() => setActiveDays(prev => ({ ...prev, [day]: !isActive }))}
+                className={`p-2 text-sm rounded ${
+                  isActive ? 'bg-blue-500 text-white' : 'bg-gray-100'
+                }`}
               >
-                ✕
+                {day.charAt(0).toUpperCase()}
               </button>
-            </div>
-          ))}
+            ))}
+          </div>
         </div>
-        <button
-          type="button"
-          onClick={handleAddTask}
-          className="w-full mt-4 p-2 border-2 border-dashed border-gray-300 rounded-md text-gray-500 hover:border-blue-500 hover:text-blue-500"
-        >
-          Add Task
-        </button>
-      </div>
 
-      <button
-        type="submit"
-        disabled={isSubmitting}
-        className={`w-full bg-blue-500 text-white p-3 rounded-md hover:bg-blue-600 
-          ${isSubmitting ? 'opacity-50 cursor-not-allowed' : ''}`}
-      >
-        {isSubmitting ? 'Creating...' : 'Create Playlist'}
-      </button>
-    </form>
+        <div>
+          <h3 className="text-lg font-medium mb-2">Tasks</h3>
+          <div className="space-y-4">
+            {tasks.map((task, index) => (
+              <div
+                key={task.id}
+                draggable
+                onDragStart={(e) => handleDragStart(e, index)}
+                onDragEnd={handleDragEnd}
+                onDragOver={handleDragOver}
+                onDrop={(e) => handleDrop(e, index)}
+                className="flex gap-2 items-center bg-white p-2 rounded-md shadow-sm border border-gray-200 cursor-move transition-opacity duration-200"
+              >
+                <div className="text-gray-400">☰</div>
+                <input
+                  type="text"
+                  value={task.title}
+                  onChange={(e) => handleTaskChange(index, 'title', e.target.value)}
+                  placeholder="Task name"
+                  className="flex-1 rounded-md border-gray-300"
+                  required
+                />
+                <input
+                  type="number"
+                  value={task.duration}
+                  onChange={(e) => handleTaskChange(index, 'duration', parseInt(e.target.value) || 0)}
+                  placeholder="Minutes"
+                  className="w-20 rounded-md border-gray-300"
+                  required
+                  min="1"
+                />
+                <button
+                  type="button"
+                  onClick={() => setTasks(prev => prev.filter((_, i) => i !== index))}
+                  className="text-red-500 hover:text-red-600"
+                >
+                  ✕
+                </button>
+              </div>
+            ))}
+          </div>
+          <button
+            type="button"
+            onClick={handleAddTask}
+            className="w-full mt-4 p-2 border-2 border-dashed border-gray-300 rounded-md text-gray-500 hover:border-blue-500 hover:text-blue-500"
+          >
+            Add Task
+          </button>
+        </div>
+
+        <button
+          type="submit"
+          disabled={isSubmitting}
+          className={`w-full bg-blue-500 text-white p-3 rounded-md hover:bg-blue-600 
+            ${isSubmitting ? 'opacity-50 cursor-not-allowed' : ''}`}
+        >
+          {isSubmitting ? 'Creating...' : 'Create Playlist'}
+        </button>
+      </form>
+    </main>
   );
 } 

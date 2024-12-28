@@ -1,16 +1,26 @@
+export interface TaskCompletion {
+  id: string;
+  taskId: string;
+  date: Date;
+  createdAt: Date;
+}
+
+export interface Task {
+  id: string;
+  title: string;
+  duration: number;
+  isCompleted: boolean;
+  order: number;
+  playlistId: string;
+  createdAt: Date;
+  updatedAt: Date;
+  completions: TaskCompletion[];
+}
+
 export interface PlaylistWithTasks {
   id: string;
   name: string;
-  tasks: {
-    id: string;
-    title: string;
-    duration: number;
-    isCompleted: boolean;
-    order: number;
-    playlistId: string;
-    createdAt: Date;
-    updatedAt: Date;
-  }[];
+  tasks: Task[];
   monday: boolean;
   tuesday: boolean;
   wednesday: boolean;

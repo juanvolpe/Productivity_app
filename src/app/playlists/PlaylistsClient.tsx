@@ -28,19 +28,19 @@ export default function PlaylistsClient({ initialPlaylists }: PlaylistsClientPro
   const [isCleaningUp, setIsCleaningUp] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
 
-  const handleDelete = async (id: string) => {
+  const handleDelete = async (playlistId: string) => {
     if (!confirm('Are you sure you want to delete this playlist?')) return;
-    
+
     try {
-      const response = await fetch(`/api/playlists?id=${id}`, {
+      const response = await fetch(`/api/playlists/${playlistId}`, {
         method: 'DELETE',
       });
-      
+
       if (!response.ok) {
         throw new Error('Failed to delete playlist');
       }
-      
-      setPlaylists(playlists.filter(p => p.id !== id));
+
+      router.refresh();
     } catch (error) {
       console.error('Failed to delete playlist:', error);
       alert('Failed to delete playlist. Please try again.');
@@ -48,26 +48,29 @@ export default function PlaylistsClient({ initialPlaylists }: PlaylistsClientPro
   };
 
   const handleCleanup = async () => {
-    if (!confirm('Are you sure you want to delete ALL playlists? This action cannot be undone.')) return;
-    if (!confirm('This will permanently delete all your playlists and tasks. Are you really sure?')) return;
-    
+    if (!confirm('Are you sure you want to clean up all playlists? This will mark all tasks as incomplete.')) return;
+
     try {
-      setIsCleaningUp(true);
-      const response = await fetch('/api/playlists/cleanup', {
-        method: 'DELETE',
-      });
-      
-      if (!response.ok) {
-        throw new Error('Failed to clean up playlists');
-      }
-      
-      setPlaylists([]);
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      const dateString = today.toISOString().split('T')[0];
+
+      await Promise.all(playlists.map(async (playlist) => {
+        const response = await fetch(`/api/playlists/${playlist.id}/tasks/cleanup?date=${dateString}`, {
+          method: 'POST',
+        });
+
+        if (!response.ok) {
+          throw new Error('Failed to cleanup tasks');
+        }
+      }));
+
       router.refresh();
+      setShowSuccess(true);
+      setTimeout(() => setShowSuccess(false), 2000);
     } catch (error) {
-      console.error('Failed to clean up playlists:', error);
-      alert('Failed to clean up playlists. Please try again.');
-    } finally {
-      setIsCleaningUp(false);
+      console.error('Failed to cleanup tasks:', error);
+      alert('Failed to cleanup tasks. Please try again.');
     }
   };
 
@@ -78,27 +81,27 @@ export default function PlaylistsClient({ initialPlaylists }: PlaylistsClientPro
     setTimeout(() => setShowSuccess(false), 2000);
   };
 
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const dateString = today.toISOString().split('T')[0];
+
   return (
     <>
       {showSuccess && <SuccessAnimation onComplete={() => setShowSuccess(false)} />}
       <main className="p-8 max-w-4xl mx-auto">
         <h1 className="page-title mb-4">Manage Playlists</h1>
         <div className="flex gap-4 mb-8 w-full">
-          <a href="/playlists/new" className="flex-1 btn-primary">
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-            </svg>
+          <a
+            href="/playlists/new"
+            className="w-full bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 text-center"
+          >
             Create Playlist
           </a>
           <button
             onClick={handleCleanup}
-            disabled={isCleaningUp || playlists.length === 0}
-            className="flex-1 btn-secondary bg-red-500 hover:bg-red-600 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="w-full bg-gray-100 text-gray-700 px-4 py-2 rounded-md hover:bg-gray-200"
           >
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-            </svg>
-            {isCleaningUp ? 'Cleaning...' : 'Clean Up All'}
+            Clean Up All
           </button>
         </div>
 
@@ -125,45 +128,32 @@ export default function PlaylistsClient({ initialPlaylists }: PlaylistsClientPro
             playlists.map((playlist) => (
               <div
                 key={playlist.id}
-                className="card"
+                className="bg-white rounded-lg shadow p-4"
               >
-                <div className="flex items-center justify-between">
-                  <div>
+                <div className="flex justify-between items-center">
+                  <a
+                    href={`/playlist/${playlist.id}/${dateString}`}
+                    className="text-lg font-medium text-gray-900 hover:text-blue-500"
+                  >
+                    {playlist.name}
+                  </a>
+                  <div className="flex items-center gap-2">
                     <a
-                      href={`/playlist/${playlist.id}`}
-                      className="hover:text-indigo-600"
+                      href={`/playlists/${playlist.id}/edit`}
+                      className="text-gray-500 hover:text-blue-500"
                     >
-                      <h2 className="text-lg font-semibold hover:text-indigo-600 transition-colors">{playlist.name}</h2>
-                    </a>
-                    <div className="flex items-center gap-4">
-                      <p className="text-sm text-gray-500">
-                        {playlist.tasks.length} tasks
-                      </p>
-                      <p className="text-sm text-indigo-500">
-                        Scheduled: {getScheduleDays(playlist).join(', ')}
-                      </p>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-4">
-                    <a
-                      href={`/playlists/edit/${playlist.id}`}
-                      className="text-indigo-500 hover:text-indigo-600 inline-flex items-center gap-1"
-                    >
-                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                      </svg>
                       Edit
                     </a>
                     <button
                       onClick={() => handleDelete(playlist.id)}
-                      className="text-red-500 hover:text-red-600 inline-flex items-center gap-1"
+                      className="text-red-500 hover:text-red-600"
                     >
-                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                      </svg>
                       Delete
                     </button>
                   </div>
+                </div>
+                <div className="mt-2 text-sm text-gray-500">
+                  {playlist.tasks.length} tasks
                 </div>
               </div>
             ))

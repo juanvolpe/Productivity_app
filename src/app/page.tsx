@@ -1,7 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-import Link from "next/link";
+import { useState, useEffect } from 'react';
 import { PlaylistWithTasks } from '@/types/playlist';
 
 function formatDate(date: Date) {
@@ -10,38 +9,6 @@ function formatDate(date: Date) {
   const month = (date.getMonth() + 1).toString().padStart(2, '0');
   const dateNum = date.getDate().toString().padStart(2, '0');
   return { dayName, shortDate: `${month}/${dateNum}` };
-}
-
-function getScheduleDays(playlist: PlaylistWithTasks): string[] {
-  const days = [];
-  if (playlist.monday) days.push('Monday');
-  if (playlist.tuesday) days.push('Tuesday');
-  if (playlist.wednesday) days.push('Wednesday');
-  if (playlist.thursday) days.push('Thursday');
-  if (playlist.friday) days.push('Friday');
-  if (playlist.saturday) days.push('Saturday');
-  if (playlist.sunday) days.push('Sunday');
-  return days;
-}
-
-function getPlaylistStatus(playlist: PlaylistWithTasks) {
-  const completedTasks = playlist.tasks.filter(task => task.isCompleted).length;
-  if (completedTasks === 0) return 'Not Started';
-  if (completedTasks === playlist.tasks.length) return 'Completed';
-  return 'In Progress';
-}
-
-function getStatusColor(status: string) {
-  switch (status) {
-    case 'Not Started':
-      return 'text-gray-500 bg-gray-100';
-    case 'In Progress':
-      return 'text-indigo-600 bg-indigo-50';
-    case 'Completed':
-      return 'text-green-600 bg-green-50';
-    default:
-      return 'text-gray-500 bg-gray-100';
-  }
 }
 
 export default function Home() {
@@ -99,12 +66,12 @@ export default function Home() {
           <h2 className="text-red-800 font-medium">Error</h2>
           <p className="text-red-600 mt-1">{error}</p>
           <div className="mt-4">
-            <Link
+            <a
               href="/playlists"
               className="text-indigo-500 hover:text-indigo-600 font-medium"
             >
               Go to All Playlists
-            </Link>
+            </a>
           </div>
         </div>
       </div>
@@ -112,6 +79,7 @@ export default function Home() {
   }
 
   const isToday = new Date().toDateString() === selectedDate.toDateString();
+  const dateString = selectedDate.toISOString().split('T')[0];
 
   return (
     <main className="p-8 max-w-4xl mx-auto">
@@ -175,7 +143,7 @@ export default function Home() {
               </svg>
             </div>
             <p className="text-gray-600 mb-4">No playlists scheduled for {dayName}</p>
-            <Link
+            <a
               href="/playlists/new"
               className="text-indigo-500 hover:text-indigo-600 font-medium inline-flex items-center gap-2"
             >
@@ -183,42 +151,32 @@ export default function Home() {
               <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7"/>
               </svg>
-            </Link>
+            </a>
           </div>
         ) : (
-          playlists.map((playlist) => {
-            const status = getPlaylistStatus(playlist);
-            const statusColor = getStatusColor(status);
-            
-            return (
-              <Link
-                key={playlist.id}
-                href={`/playlist/${playlist.id}`}
-                className="card block hover:border-indigo-200 group"
-              >
-                <div className="flex items-center justify-between">
-                  <div>
-                    <h2 className="text-lg font-semibold group-hover:text-indigo-600 transition-colors">
-                      {playlist.name}
-                    </h2>
-                    <p className="text-sm text-gray-500">
-                      {playlist.tasks.length} tasks
-                    </p>
-                  </div>
-                  <div className="flex items-center gap-3">
-                    <span className={`px-3 py-1 rounded-full text-sm font-medium ${statusColor}`}>
-                      {status}
-                    </span>
-                    <div className="opacity-0 group-hover:opacity-100 transition-opacity">
-                      <svg className="h-5 w-5 text-indigo-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7"/>
-                      </svg>
-                    </div>
-                  </div>
+          playlists.map((playlist) => (
+            <a
+              key={playlist.id}
+              href={`/playlist/${playlist.id}/${dateString}`}
+              className="card block hover:border-indigo-200 group"
+            >
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-lg font-semibold group-hover:text-indigo-600 transition-colors">
+                    {playlist.name}
+                  </h2>
+                  <p className="text-sm text-gray-500">
+                    {playlist.tasks.length} tasks
+                  </p>
                 </div>
-              </Link>
-            );
-          })
+                <div className="opacity-0 group-hover:opacity-100 transition-opacity">
+                  <svg className="h-5 w-5 text-indigo-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7"/>
+                  </svg>
+                </div>
+              </div>
+            </a>
+          ))
         )}
       </div>
     </main>

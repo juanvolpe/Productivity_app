@@ -19,9 +19,10 @@ interface TaskWithTimer {
 
 interface PlaylistTimerProps {
   playlist: PlaylistWithTasks;
+  date: string;
 }
 
-export default function PlaylistTimer({ playlist }: PlaylistTimerProps) {
+export default function PlaylistTimer({ playlist, date }: PlaylistTimerProps) {
   const router = useRouter();
   const [currentTaskIndex, setCurrentTaskIndex] = useState(0);
   const [isRunning, setIsRunning] = useState(false);
@@ -46,7 +47,7 @@ export default function PlaylistTimer({ playlist }: PlaylistTimerProps) {
     if (!confirm('Are you sure you want to reset all task progress? This will mark all tasks as incomplete.')) return;
     
     try {
-      const response = await fetch(`/api/playlists/${playlist.id}/tasks/cleanup`, {
+      const response = await fetch(`/api/playlists/${playlist.id}/tasks/cleanup?date=${date}`, {
         method: 'POST',
       });
 
@@ -95,7 +96,10 @@ export default function PlaylistTimer({ playlist }: PlaylistTimerProps) {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ isCompleted: true }),
+        body: JSON.stringify({ 
+          isCompleted: true,
+          date: date
+        }),
       });
 
       if (!response.ok) {
@@ -134,7 +138,10 @@ export default function PlaylistTimer({ playlist }: PlaylistTimerProps) {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ isCompleted: false }),
+        body: JSON.stringify({ 
+          isCompleted: false,
+          date: date
+        }),
       });
 
       if (!response.ok) {

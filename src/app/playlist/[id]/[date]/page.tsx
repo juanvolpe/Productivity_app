@@ -1,26 +1,26 @@
 import { prisma } from '@/lib/db';
 import { notFound } from 'next/navigation';
-import PlaylistTimer from './PlaylistTimer';
+import PlaylistTimer from '../PlaylistTimer';
 import { logger } from '@/lib/logger';
 import { PlaylistWithTasks } from '@/types/playlist';
 
 type Task = PlaylistWithTasks['tasks'][0];
 
-export default async function PlaylistPage({
+export default async function PlaylistDatePage({
   params
 }: {
-  params: { id: string }
+  params: { id: string; date: string }
 }) {
   try {
-    logger.info('Loading playlist:', params.id);
+    logger.info('Loading playlist:', params.id, 'for date:', params.date);
     
-    // Get today's date at midnight in local timezone
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
+    // Parse the date from URL
+    const targetDate = new Date(params.date);
+    targetDate.setHours(0, 0, 0, 0);
     
-    // Get tomorrow's date at midnight
-    const tomorrow = new Date(today);
-    tomorrow.setDate(tomorrow.getDate() + 1);
+    // Get next day for date range query
+    const nextDate = new Date(targetDate);
+    nextDate.setDate(nextDate.getDate() + 1);
 
     const playlist = await prisma.playlist.findUnique({
       where: { id: params.id },
@@ -32,10 +32,9 @@ export default async function PlaylistPage({
           include: {
             completions: {
               where: {
-                // Only get completions for exactly today's date
                 date: {
-                  gte: today,
-                  lt: tomorrow
+                  gte: targetDate,
+                  lt: nextDate
                 }
               }
             }
@@ -49,7 +48,7 @@ export default async function PlaylistPage({
       notFound();
     }
 
-    // Transform tasks to include isCompleted based on today's completions
+    // Transform tasks to include isCompleted based on target date's completions
     const transformedPlaylist = {
       ...playlist,
       tasks: playlist.tasks.map((task: { completions: any[]; } & Task) => ({
@@ -74,7 +73,17 @@ export default async function PlaylistPage({
         <div className="sticky top-0 bg-white border-b shadow-sm z-10">
           <div className="max-w-4xl mx-auto px-4 py-4">
             <div className="flex justify-between items-center">
-              <h1 className="text-xl font-semibold text-gray-900">{playlist.name}</h1>
+              <div>
+                <h1 className="text-xl font-semibold text-gray-900">{playlist.name}</h1>
+                <p className="text-sm text-gray-500 mt-1">
+                  {new Date(params.date).toLocaleDateString(undefined, { 
+                    weekday: 'long',
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric'
+                  })}
+                </p>
+              </div>
               <div className="text-sm text-gray-500">
                 {playlist.tasks.length} tasks
               </div>
@@ -94,7 +103,7 @@ export default async function PlaylistPage({
           </div>
         </div>
         <main className="max-w-4xl mx-auto p-4">
-          <PlaylistTimer playlist={playlist} />
+          <PlaylistTimer playlist={transformedPlaylist} date={params.date} />
         </main>
       </div>
     );
