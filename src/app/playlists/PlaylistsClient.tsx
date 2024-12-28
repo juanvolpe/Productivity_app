@@ -162,7 +162,7 @@ export default function PlaylistsClient({ initialPlaylists }: PlaylistsClientPro
                     </div>
                     <div className="flex items-center gap-2 shrink-0">
                       <a
-                        href={`/playlists/${playlist.id}/edit`}
+                        href={`/playlists/edit/${playlist.id}`}
                         className="text-gray-500 hover:text-blue-500"
                       >
                         Edit
