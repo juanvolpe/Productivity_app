@@ -63,16 +63,19 @@ export default function PlaylistsClient({ initialPlaylists }: PlaylistsClientPro
       today.setHours(0, 0, 0, 0);
       const dateString = today.toISOString().split('T')[0];
 
-      await Promise.all(playlists.map(async (playlist) => {
+      // Process playlists sequentially to avoid overwhelming the server
+      for (const playlist of playlists) {
         const response = await fetch(`/api/playlists/${playlist.id}/tasks/cleanup?date=${dateString}`, {
           method: 'POST',
         });
 
         if (!response.ok) {
-          throw new Error('Failed to cleanup tasks');
+          const data = await response.json();
+          throw new Error(data.error || 'Failed to cleanup tasks');
         }
-      }));
+      }
 
+      // Refresh the page to show updated state
       router.refresh();
     } catch (error) {
       console.error('Failed to cleanup tasks:', error);
