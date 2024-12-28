@@ -161,15 +161,15 @@ export default function Home() {
               className="card block hover:border-indigo-200 group"
             >
               <div className="flex items-center justify-between">
-                <div>
-                  <h2 className="text-lg font-semibold group-hover:text-indigo-600 transition-colors">
+                <div className="min-w-0 flex-1">
+                  <h2 className="text-lg font-semibold group-hover:text-indigo-600 transition-colors truncate">
                     {playlist.name}
                   </h2>
                   <p className="text-sm text-gray-500">
                     {playlist.tasks.length} tasks
                   </p>
                 </div>
-                <div className="opacity-0 group-hover:opacity-100 transition-opacity">
+                <div className="opacity-0 group-hover:opacity-100 transition-opacity ml-4">
                   <svg className="h-5 w-5 text-indigo-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7"/>
                   </svg>

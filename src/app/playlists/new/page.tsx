@@ -104,6 +104,7 @@ export default function NewPlaylistPage() {
             duration: task.duration,
             isCompleted: false,
             order: task.order,
+            completions: []
           }))
         }
       };
@@ -143,6 +144,8 @@ export default function NewPlaylistPage() {
             type="text"
             id="name"
             name="name"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
             required
             className="w-full px-4 py-3 rounded-lg border border-gray-300 bg-white shadow-sm focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 text-gray-900"
             placeholder="Enter playlist name"

@@ -130,14 +130,19 @@ export default function PlaylistsClient({ initialPlaylists }: PlaylistsClientPro
                 key={playlist.id}
                 className="bg-white rounded-lg shadow p-4"
               >
-                <div className="flex justify-between items-center">
-                  <a
-                    href={`/playlist/${playlist.id}/${dateString}`}
-                    className="text-lg font-medium text-gray-900 hover:text-blue-500"
-                  >
-                    {playlist.name}
-                  </a>
-                  <div className="flex items-center gap-2">
+                <div className="flex justify-between items-center gap-4">
+                  <div className="min-w-0 flex-1">
+                    <a
+                      href={`/playlist/${playlist.id}/${dateString}`}
+                      className="text-lg font-medium text-gray-900 hover:text-blue-500 block truncate"
+                    >
+                      {playlist.name}
+                    </a>
+                    <div className="mt-1 text-sm text-gray-500">
+                      {playlist.tasks.length} tasks
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2 shrink-0">
                     <a
                       href={`/playlists/${playlist.id}/edit`}
                       className="text-gray-500 hover:text-blue-500"
@@ -151,9 +156,6 @@ export default function PlaylistsClient({ initialPlaylists }: PlaylistsClientPro
                       Delete
                     </button>
                   </div>
-                </div>
-                <div className="mt-2 text-sm text-gray-500">
-                  {playlist.tasks.length} tasks
                 </div>
               </div>
             ))
