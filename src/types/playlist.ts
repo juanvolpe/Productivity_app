@@ -34,6 +34,16 @@ export interface PlaylistWithTasks {
 
 export type PlaylistCreateInput = Omit<PlaylistWithTasks, 'id' | 'createdAt' | 'updatedAt' | 'tasks'> & {
   tasks: {
-    create: Omit<PlaylistWithTasks['tasks'][0], 'id' | 'playlistId' | 'createdAt' | 'updatedAt'>[];
+    create: Array<{
+      title: string;
+      duration: number;
+      isCompleted: boolean;
+      order: number;
+      completions?: {
+        create: Array<{
+          date: Date;
+        }>;
+      };
+    }>;
   };
 }; 

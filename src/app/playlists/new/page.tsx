@@ -97,14 +97,19 @@ export default function NewPlaylistPage() {
       setIsSubmitting(true);
       const playlistData: PlaylistCreateInput = {
         name,
-        ...activeDays,
+        monday: activeDays.monday,
+        tuesday: activeDays.tuesday,
+        wednesday: activeDays.wednesday,
+        thursday: activeDays.thursday,
+        friday: activeDays.friday,
+        saturday: activeDays.saturday,
+        sunday: activeDays.sunday,
         tasks: {
           create: tasks.map(task => ({
             title: task.title,
             duration: task.duration,
             isCompleted: false,
-            order: task.order,
-            completions: []
+            order: task.order
           }))
         }
       };

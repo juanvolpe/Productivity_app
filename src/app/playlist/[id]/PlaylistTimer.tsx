@@ -37,12 +37,11 @@ export default function PlaylistTimer({ playlist, date }: PlaylistTimerProps) {
   // Check if all tasks are completed
   useEffect(() => {
     const allCompleted = tasks.every(task => task.isCompleted);
-    const wasNotPreviouslyCompleted = !showSuccess; // Only show animation if it wasn't already shown
-    if (allCompleted && wasNotPreviouslyCompleted && tasks.length > 0) {
+    if (allCompleted && tasks.length > 0) {
       setShowSuccess(true);
       setTimeout(() => setShowSuccess(false), 2000);
     }
-  }, [tasks, showSuccess]);
+  }, [tasks]);
 
   const handleCleanup = async () => {
     if (!confirm('Are you sure you want to reset all task progress? This will mark all tasks as incomplete.')) return;
