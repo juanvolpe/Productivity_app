@@ -157,29 +157,46 @@ export default function Home() {
             </a>
           </div>
         ) : (
-          playlists.map((playlist) => (
-            <a
-              key={playlist.id}
-              href={`/playlist/${playlist.id}/${dateString}`}
-              className="card block hover:border-indigo-200 group"
-            >
-              <div className="flex items-center justify-between">
-                <div className="min-w-0 flex-1">
-                  <h2 className="text-lg font-semibold group-hover:text-indigo-600 transition-colors truncate">
-                    {playlist.name}
-                  </h2>
-                  <p className="text-sm text-gray-500">
-                    {playlist.tasks.length} tasks
-                  </p>
+          playlists.map((playlist) => {
+            // Calculate completion status
+            const completedTasks = playlist.tasks.filter(task => task.completions.length > 0).length;
+            const totalTasks = playlist.tasks.length;
+            let status = "Not Started";
+            if (completedTasks === totalTasks && totalTasks > 0) {
+              status = "Completed";
+            } else if (completedTasks > 0) {
+              status = "In Progress";
+            }
+
+            return (
+              <a
+                key={playlist.id}
+                href={`/playlist/${playlist.id}/${dateString}`}
+                className="card block hover:border-indigo-200 group"
+              >
+                <div className="flex items-center justify-between">
+                  <div className="min-w-0 flex-1">
+                    <h2 className="text-lg font-semibold group-hover:text-indigo-600 transition-colors truncate">
+                      {playlist.name}
+                    </h2>
+                    <div className="flex items-center gap-2 mt-1">
+                      <span className="text-sm text-gray-500">
+                        {playlist.tasks.length} tasks
+                      </span>
+                      <span className="text-xs px-2 py-1 rounded-full bg-gray-100">
+                        {status}
+                      </span>
+                    </div>
+                  </div>
+                  <div className="opacity-0 group-hover:opacity-100 transition-opacity ml-4">
+                    <svg className="h-5 w-5 text-indigo-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7"/>
+                    </svg>
+                  </div>
                 </div>
-                <div className="opacity-0 group-hover:opacity-100 transition-opacity ml-4">
-                  <svg className="h-5 w-5 text-indigo-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7"/>
-                  </svg>
-                </div>
-              </div>
-            </a>
-          ))
+              </a>
+            );
+          })
         )}
       </div>
     </main>
