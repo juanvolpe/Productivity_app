@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { PlaylistWithTasks } from '@/types/playlist';
 import { useRouter } from 'next/navigation';
+import SuccessAnimation from '@/components/SuccessAnimation';
 
 interface TaskWithTimer {
   id: string;
@@ -24,12 +25,22 @@ export default function PlaylistTimer({ playlist }: PlaylistTimerProps) {
   const router = useRouter();
   const [currentTaskIndex, setCurrentTaskIndex] = useState(0);
   const [isRunning, setIsRunning] = useState(false);
+  const [showSuccess, setShowSuccess] = useState(false);
   const [tasks, setTasks] = useState<TaskWithTimer[]>(() => 
     playlist.tasks.map(task => ({
       ...task,
       timeLeft: task.duration * 60
     }))
   );
+
+  // Check if all tasks are completed
+  useEffect(() => {
+    const allCompleted = tasks.every(task => task.isCompleted);
+    if (allCompleted) {
+      setShowSuccess(true);
+      setTimeout(() => setShowSuccess(false), 2000);
+    }
+  }, [tasks]);
 
   const handleCleanup = async () => {
     if (!confirm('Are you sure you want to reset all task progress? This will mark all tasks as incomplete.')) return;
@@ -151,6 +162,7 @@ export default function PlaylistTimer({ playlist }: PlaylistTimerProps) {
 
   return (
     <div className="space-y-6">
+      {showSuccess && <SuccessAnimation onComplete={() => setShowSuccess(false)} />}
       {tasks.map((task, index) => (
         <div
           key={task.id}
