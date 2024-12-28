@@ -14,6 +14,9 @@ export default async function PlaylistsPage() {
         tasks: {
           orderBy: {
             order: 'asc'
+          },
+          include: {
+            completions: true
           }
         }
       },
