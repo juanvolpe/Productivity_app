@@ -9,7 +9,7 @@ export async function GET(request: Request) {
     const dateParam = searchParams.get('date');
     
     if (!dateParam) {
-      logger.error('Date parameter is missing', { dateParam });
+      logger.error('Date parameter is missing');
       return NextResponse.json(
         { error: 'Date parameter is required' },
         { status: 400 }
@@ -20,7 +20,7 @@ export async function GET(request: Request) {
     const start = startOfDay(date);
     const end = endOfDay(date);
 
-    logger.info('Fetching playlists for date', { date: date.toISOString(), day: date.getDay() });
+    logger.info('Fetching playlists for:', { date: date.toISOString(), day: date.getDay() });
 
     const playlists = await prisma.playlist.findMany({
       where: {
@@ -60,7 +60,7 @@ export async function GET(request: Request) {
 
     return NextResponse.json(playlistsWithStatus);
   } catch (error) {
-    logger.error('Failed to fetch playlists', error);
+    logger.error('Failed to fetch playlists:', error);
     return NextResponse.json(
       { error: 'Failed to fetch playlists' },
       { status: 500 }
