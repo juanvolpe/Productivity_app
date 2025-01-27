@@ -1,6 +1,6 @@
 import { prisma } from '@/lib/db';
 import { notFound } from 'next/navigation';
-import PlaylistTimer from '../PlaylistTimer';
+import PlaylistTimer from '../../[id]/PlaylistTimer';
 import { logger } from '@/lib/logger';
 import { PlaylistWithTasks } from '@/types/playlist';
 
@@ -25,6 +25,18 @@ export default async function PlaylistDatePage({
     const nextDate = new Date(targetDate);
     nextDate.setDate(nextDate.getDate() + 1);
 
+    // Add this before the main query
+    const taskCount = await prisma.task.count({
+      where: {
+        playlistId: params.id
+      }
+    });
+
+    logger.info('Task count for playlist:', {
+      playlistId: params.id,
+      taskCount
+    });
+
     const playlist = await prisma.playlist.findUnique({
       where: { id: params.id },
       include: {
@@ -46,6 +58,30 @@ export default async function PlaylistDatePage({
       }
     });
 
+    // Add this debug logging right after the query
+    logger.info('Database query result:', {
+      id: playlist?.id,
+      name: playlist?.name,
+      rawTaskCount: playlist?.tasks?.length,
+      rawTasks: playlist?.tasks,
+      targetDate: targetDate.toISOString(),
+      nextDate: nextDate.toISOString()
+    });
+
+    // Enhanced debug logging
+    logger.info('Raw playlist data:', {
+      id: playlist?.id,
+      name: playlist?.name,
+      taskCount: playlist?.tasks?.length,
+      tasks: playlist?.tasks.map(t => ({
+        id: t.id,
+        title: t.title,
+        duration: t.duration,
+        order: t.order,
+        completions: t.completions.length
+      }))
+    });
+
     if (!playlist) {
       logger.warn('Playlist not found:', params.id);
       notFound();
@@ -59,6 +95,20 @@ export default async function PlaylistDatePage({
         isCompleted: task.completions.length > 0
       }))
     };
+
+    // Debug transformed playlist
+    logger.info('Transformed playlist data:', {
+      id: transformedPlaylist.id,
+      name: transformedPlaylist.name,
+      taskCount: transformedPlaylist.tasks.length,
+      tasks: transformedPlaylist.tasks.map(t => ({
+        id: t.id,
+        title: t.title,
+        duration: t.duration,
+        order: t.order,
+        isCompleted: t.isCompleted
+      }))
+    });
 
     logger.info('Playlist loaded successfully:', playlist.name);
 
@@ -106,7 +156,10 @@ export default async function PlaylistDatePage({
           </div>
         </div>
         <main className="max-w-4xl mx-auto p-4">
-          <PlaylistTimer playlist={transformedPlaylist} date={params.date} />
+          <PlaylistTimer 
+            playlist={transformedPlaylist} 
+            date={params.date} 
+          />
         </main>
       </div>
     );

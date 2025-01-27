@@ -11,9 +11,6 @@ export async function GET() {
         tasks: {
           orderBy: {
             order: 'asc'
-          },
-          include: {
-            completions: true
           }
         }
       },
@@ -26,25 +23,89 @@ export async function GET() {
     return NextResponse.json(playlists);
   } catch (error) {
     logger.error('Failed to fetch playlists:', error);
-    return new NextResponse('Internal Server Error', { status: 500 });
+    return NextResponse.json(
+      { error: 'Failed to fetch playlists' },
+      { status: 500 }
+    );
   }
 }
 
 export async function POST(request: Request) {
   try {
-    const data = await request.json();
+    const body = await request.json();
+    logger.info('Received request body:', body);
+
+    // Extract name and handle both formats of day selection
+    const { 
+      name, 
+      selectedDays,
+      monday, tuesday, wednesday, thursday, friday, saturday, sunday 
+    } = body;
+
+    // Validate name
+    if (!name || typeof name !== 'string' || !name.trim()) {
+      logger.error('Invalid name:', { name });
+      return NextResponse.json(
+        { error: 'Playlist name is required' },
+        { status: 400 }
+      );
+    }
+
+    // Convert individual day booleans to selectedDays array if needed
+    const daysArray = selectedDays || [
+      monday && 'monday',
+      tuesday && 'tuesday',
+      wednesday && 'wednesday',
+      thursday && 'thursday',
+      friday && 'friday',
+      saturday && 'saturday',
+      sunday && 'sunday'
+    ].filter(Boolean);
+
+    // Validate days
+    if (!daysArray.length) {
+      logger.error('No days selected');
+      return NextResponse.json(
+        { error: 'At least one day must be selected' },
+        { status: 400 }
+      );
+    }
+
+    // Validate days format
+    const validDays = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
+    const invalidDays = daysArray.filter(day => !validDays.includes(day));
+    if (invalidDays.length > 0) {
+      logger.error('Invalid days:', { invalidDays });
+      return NextResponse.json(
+        { error: `Invalid days: ${invalidDays.join(', ')}` },
+        { status: 400 }
+      );
+    }
+
+    logger.info('Creating playlist with:', { name, days: daysArray });
+
     const playlist = await prisma.playlist.create({
-      data,
-      include: {
-        tasks: true
+      data: {
+        name: name.trim(),
+        monday: daysArray.includes('monday'),
+        tuesday: daysArray.includes('tuesday'),
+        wednesday: daysArray.includes('wednesday'),
+        thursday: daysArray.includes('thursday'),
+        friday: daysArray.includes('friday'),
+        saturday: daysArray.includes('saturday'),
+        sunday: daysArray.includes('sunday'),
       }
     });
-    
+
+    logger.info('Created playlist:', playlist);
     return NextResponse.json(playlist);
   } catch (error) {
     logger.error('Failed to create playlist:', error);
     return NextResponse.json(
-      { error: 'Failed to create playlist' },
+      { 
+        error: 'Failed to create playlist',
+        details: error instanceof Error ? error.message : 'Unknown error'
+      },
       { status: 500 }
     );
   }

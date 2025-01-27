@@ -1,18 +1,15 @@
-import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
+import { NextResponse } from 'next/server';
+import { startOfDay, endOfDay } from 'date-fns';
 import { logger } from '@/lib/logger';
-
-function getDayName(date: Date): string {
-  const days = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
-  return days[date.getDay()];
-}
 
 export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
     const dateParam = searchParams.get('date');
-
+    
     if (!dateParam) {
+      logger.error('Date parameter is missing');
       return NextResponse.json(
         { error: 'Date parameter is required' },
         { status: 400 }
@@ -20,13 +17,14 @@ export async function GET(request: Request) {
     }
 
     const date = new Date(dateParam);
-    const dayName = getDayName(date);
-    
-    logger.info('Fetching playlists for:', dayName, date.toDateString());
+    const start = startOfDay(date);
+    const end = endOfDay(date);
+
+    logger.info('Fetching playlists for:', { date: date.toISOString(), day: date.getDay() });
 
     const playlists = await prisma.playlist.findMany({
       where: {
-        [dayName]: true
+        [['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'][date.getDay()]]: true
       },
       include: {
         tasks: {
@@ -34,14 +32,33 @@ export async function GET(request: Request) {
             order: 'asc'
           },
           include: {
-            completions: true
+            completions: {
+              where: {
+                date: {
+                  gte: start,
+                  lte: end
+                }
+              }
+            }
+          }
+        },
+        completions: {
+          where: {
+            date: {
+              gte: start,
+              lte: end
+            }
           }
         }
       }
     });
 
-    logger.info(`Found ${playlists.length} playlists for ${dayName}`);
-    return NextResponse.json(playlists);
+    const playlistsWithStatus = playlists.map(playlist => ({
+      ...playlist,
+      isCompleted: playlist.completions.length > 0
+    }));
+
+    return NextResponse.json(playlistsWithStatus);
   } catch (error) {
     logger.error('Failed to fetch playlists:', error);
     return NextResponse.json(

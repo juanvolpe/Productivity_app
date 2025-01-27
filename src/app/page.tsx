@@ -188,9 +188,11 @@ export default function Home() {
                       <span className="text-sm text-gray-500">
                         {playlist.tasks.length} tasks
                       </span>
-                      <span className="text-xs px-2 py-1 rounded-full bg-gray-100">
-                        {status}
-                      </span>
+                      {playlist.isCompleted && (
+                        <span className="text-xs px-2 py-1 rounded-full bg-green-100 text-green-800">
+                          Completed
+                        </span>
+                      )}
                     </div>
                   </div>
                   <div className="opacity-0 group-hover:opacity-100 transition-opacity ml-4">

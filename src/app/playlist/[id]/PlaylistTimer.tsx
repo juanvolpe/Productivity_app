@@ -34,19 +34,57 @@ export default function PlaylistTimer({ playlist, date }: PlaylistTimerProps) {
     }))
   );
 
-  // Check if all tasks are completed
+  // Add debug logging when component mounts
+  useEffect(() => {
+    console.log('PlaylistTimer mounted with data:', {
+      playlistId: playlist.id,
+      playlistName: playlist.name,
+      taskCount: playlist.tasks.length,
+      tasks: playlist.tasks.map(t => ({
+        id: t.id,
+        title: t.title,
+        duration: t.duration,
+        isCompleted: t.isCompleted
+      }))
+    });
+  }, [playlist]);
+
+  // Check if all tasks are completed and update playlist completion
   useEffect(() => {
     const allCompleted = tasks.every(task => task.isCompleted);
     if (allCompleted && tasks.length > 0) {
+      // Update playlist completion status
+      fetch(`/api/playlists/${playlist.id}/complete`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ date }),
+      }).then(response => {
+        if (!response.ok) {
+          console.error('Failed to update playlist completion status');
+        }
+      });
+
       setShowSuccess(true);
       setTimeout(() => setShowSuccess(false), 2000);
     }
-  }, [tasks]);
+  }, [tasks, playlist.id, date]);
 
   const handleCleanup = async () => {
     if (!confirm('Are you sure you want to reset all task progress? This will mark all tasks as incomplete.')) return;
     
     try {
+      // First delete the playlist completion for this date
+      await fetch(`/api/playlists/${playlist.id}/complete`, {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ date }),
+      });
+
+      // Then cleanup tasks
       const response = await fetch(`/api/playlists/${playlist.id}/tasks/cleanup?date=${date}`, {
         method: 'POST',
       });
@@ -146,6 +184,18 @@ export default function PlaylistTimer({ playlist, date }: PlaylistTimerProps) {
 
       if (!response.ok) {
         throw new Error('Failed to update task');
+      }
+
+      // If this was a completed playlist, remove the completion
+      const wasCompleted = tasks.every(task => task.isCompleted);
+      if (wasCompleted) {
+        await fetch(`/api/playlists/${playlist.id}/complete`, {
+          method: 'DELETE',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ date }),
+        });
       }
 
       setTasks(prev => prev.map((task, index) => 

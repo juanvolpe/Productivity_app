@@ -1,6 +1,7 @@
 import { prisma } from '@/lib/db';
 import PlaylistsClient from './PlaylistsClient';
 import { logger } from '@/lib/logger';
+import { StatsWrapper } from './StatsWrapper';
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
@@ -25,8 +26,14 @@ export default async function PlaylistsPage() {
       }
     });
 
-    logger.info(`Found ${playlists.length} playlists`);
-    return <PlaylistsClient initialPlaylists={playlists} />;
+    const serializedPlaylists = JSON.parse(JSON.stringify(playlists));
+    
+    return (
+      <>
+        <PlaylistsClient initialPlaylists={serializedPlaylists} />
+        <StatsWrapper />
+      </>
+    );
   } catch (error) {
     logger.error('Failed to fetch playlists:', error);
     throw new Error('Failed to load playlists. Please try again later.');
