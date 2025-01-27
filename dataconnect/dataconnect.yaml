@@ -1,0 +1,12 @@
+specVersion: "v1beta"
+serviceId: "productivityappmzcopy2copy"
+location: "us-central1"
+schema:
+  source: "./schema"
+  datasource:
+    postgresql:
+      database: "fdcdb"
+      cloudSql:
+        instanceId: "productivityappmzcopy2copy-fdc"
+      # schemaValidation: "COMPATIBLE"
+connectorDirs: ["./connector"]
